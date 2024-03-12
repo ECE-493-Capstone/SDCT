@@ -1,5 +1,6 @@
 {
-  "name": "SDCT",
+  "name": "sdct",
+  "publisher": "493-W24-Team11",
   "displayName": "Software Development Collaboration Tool",
   "description": "Communication tools for developers inside Visual Studio",
   "version": "0.0.1",
