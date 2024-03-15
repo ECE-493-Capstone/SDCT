@@ -35,8 +35,8 @@
     "views": {
       "sdct-view-container": [
         {
-          "id": "dashboard",
-          "name": "Dashboard"
+          "id": "chatList",
+          "name": "Chat List"
         },
         {
           "id": "profile",
@@ -46,7 +46,7 @@
     },
     "viewsWelcome": [
       {
-        "view": "dashboard",
+        "view": "chatList",
         "contents": "[Login with GitHub](command:sdct.login)"
       }
     ]

@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { DashboardProvider } from './DashboardProvider';
+import { ChatListProvider } from './ChatListProvider';
 import { ProfileProvider } from './ProfileProvider';
 import { UserAuth } from './UserAuth';
 import { log } from 'console';
@@ -13,9 +13,9 @@ export function activate(context: vscode.ExtensionContext) {
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "SDCT" is now active!');
 
-	const dashboardProvider = new DashboardProvider(context);
-	vscode.window.createTreeView('dashboard', {
-		treeDataProvider: dashboardProvider
+	const chatListProvider = new ChatListProvider(context);
+	vscode.window.createTreeView('chatList', {
+		treeDataProvider: chatListProvider
 	});
 	const profileProvider = new ProfileProvider(context);
 	vscode.window.createTreeView('profile', {
@@ -32,13 +32,13 @@ export function activate(context: vscode.ExtensionContext) {
 			pictureUri: 'https://picsum.photos/seed/10/200/200'
 		};
 		context.globalState.update('userAuth', userAuth);
-		dashboardProvider.refresh(context);
+		chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	});
 
 	let logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
 		context.globalState.update('userAuth', undefined);
-		dashboardProvider.refresh(context);
+		chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	});
 
