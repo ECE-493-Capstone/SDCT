@@ -50,4 +50,16 @@ export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
     }
     return [];
   }
+
+  async searchChatList() {
+    const query = await vscode.window.showInputBox({
+      prompt: 'Search for chat',
+      placeHolder: 'Type the name of a friend or a group...'
+    });
+    if (!!query) {
+      const filteredData = this.data.filter(chat => chat.name.toLowerCase().includes(query.toLowerCase()));
+      this.data = filteredData;
+      this._onDidChangeTreeData.fire();
+    }
+  }
 }

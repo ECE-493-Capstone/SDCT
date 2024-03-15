@@ -21,6 +21,11 @@
       {
         "command": "sdct.logout",
         "title": "SDCT: Logout"
+      },
+      {
+        "command": "sdct.searchChat",
+        "title": "SDCT: Search Chat",
+        "icon": "media/search.png"
       }
     ],
     "viewsContainers": {
@@ -49,7 +54,17 @@
         "view": "chatList",
         "contents": "[Login with GitHub](command:sdct.login)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+          {
+              "command": "sdct.searchChat",
+              "when": "view == chatList",
+              "group": "navigation"
+          }
+      ]
+  }
+  
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

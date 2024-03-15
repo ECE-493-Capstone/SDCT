@@ -42,7 +42,11 @@ export function activate(context: vscode.ExtensionContext) {
 		profileProvider.refresh(context);
 	});
 
-	context.subscriptions.push(loginDisposable,logoutDisposable);
+	let searchChatDisposable = vscode.commands.registerCommand('sdct.searchChat', () => {
+		chatListProvider.searchChatList();
+	});
+
+	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable);
 }
 
 // This method is called when your extension is deactivated
