@@ -15,8 +15,12 @@
   "contributes": {
     "commands": [
       {
-        "command": "sdct.helloWorld",
-        "title": "Hello World"
+        "command": "sdct.login",
+        "title": "SDCT: Login with GitHub"
+      },
+      {
+        "command": "sdct.logout",
+        "title": "SDCT: Logout"
       }
     ],
     "viewsContainers": {
@@ -39,7 +43,7 @@
     "viewsWelcome": [
       {
         "view": "dashboard",
-        "contents": "[Login with GitHub](https://github.com/login)"
+        "contents": "[Login with GitHub](command:sdct.login)"
       }
     ]
   },
