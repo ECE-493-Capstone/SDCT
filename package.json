@@ -37,6 +37,10 @@
         {
           "id": "dashboard",
           "name": "Dashboard"
+        },
+        {
+          "id": "profile",
+          "name": "Profile"
         }
       ]
     },

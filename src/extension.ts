@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { DashboardProvider } from './DashboardProvider';
+import { ProfileProvider } from './ProfileProvider';
 import { UserAuth } from './UserAuth';
 import { log } from 'console';
 
@@ -16,6 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.createTreeView('dashboard', {
 		treeDataProvider: dashboardProvider
 	});
+	const profileProvider = new ProfileProvider(context);
+	vscode.window.createTreeView('profile', {
+		treeDataProvider: profileProvider
+	});
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -24,14 +29,17 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const userAuth: UserAuth = {
 			username: 'user01',
+			pictureUri: 'https://picsum.photos/seed/10/200/200'
 		};
 		context.globalState.update('userAuth', userAuth);
 		dashboardProvider.refresh(context);
+		profileProvider.refresh(context);
 	});
 
 	let logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
 		context.globalState.update('userAuth', undefined);
 		dashboardProvider.refresh(context);
+		profileProvider.refresh(context);
 	});
 
 	context.subscriptions.push(loginDisposable,logoutDisposable);
