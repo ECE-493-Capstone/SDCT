@@ -1,6 +1,7 @@
 {
-  "name": "SDCT",
-  "displayName": "Software Development Collaboration Tool",
+  "name": "sdct",
+  "publisher": "493-W24-Team11",
+  "displayName": "Software Development Collaboration Tool (SDCT)",
   "description": "Communication tools for developers inside Visual Studio",
   "version": "0.0.1",
   "engines": {
@@ -14,10 +15,66 @@
   "contributes": {
     "commands": [
       {
-        "command": "SDCT.helloWorld",
-        "title": "Hello World"
+        "command": "sdct.login",
+        "title": "SDCT: Login with GitHub"
+      },
+      {
+        "command": "sdct.logout",
+        "title": "SDCT: Logout"
+      },
+      {
+        "command": "sdct.searchChat",
+        "title": "SDCT: Search Chat",
+        "icon": "media/search.png"
+      },
+      {
+        "command": "sdct.manageAccount",
+        "title": "SDCT: Manage Account",
+        "icon": "media/setting.png"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sdct-view-container",
+          "title": "SDCT",
+          "icon": "media/sadcat.png"
+        }
+      ]
+    },
+    "views": {
+      "sdct-view-container": [
+        {
+          "id": "chatList",
+          "name": "Chat List"
+        },
+        {
+          "id": "profile",
+          "name": "Profile"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "chatList",
+        "contents": "[Login with GitHub](command:sdct.login)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+          {
+              "command": "sdct.searchChat",
+              "when": "view == chatList",
+              "group": "navigation"
+          },
+          {
+            "command": "sdct.manageAccount",
+            "when": "view == profile",
+            "group": "navigation"
+        }
+      ]
+  }
+  
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
