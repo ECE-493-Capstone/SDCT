@@ -34,7 +34,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
     treeItem.iconPath = element.pictureUri;
     treeItem.description = element.lastMessage;
     return treeItem;
-}
+  }
 
   getChildren(): Chat[] | Thenable<Chat[]> {
     if (this.authenticated) {

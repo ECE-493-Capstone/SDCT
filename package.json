@@ -26,6 +26,11 @@
         "command": "sdct.searchChat",
         "title": "SDCT: Search Chat",
         "icon": "media/search.png"
+      },
+      {
+        "command": "sdct.manageAccount",
+        "title": "SDCT: Manage Account",
+        "icon": "media/setting.png"
       }
     ],
     "viewsContainers": {
@@ -61,7 +66,12 @@
               "command": "sdct.searchChat",
               "when": "view == chatList",
               "group": "navigation"
-          }
+          },
+          {
+            "command": "sdct.manageAccount",
+            "when": "view == profile",
+            "group": "navigation"
+        }
       ]
   }
   

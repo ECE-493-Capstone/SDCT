@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import { ChatListProvider } from './ChatListProvider';
 import { ProfileProvider } from './ProfileProvider';
+import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
 import { log } from 'console';
 
@@ -46,7 +47,11 @@ export function activate(context: vscode.ExtensionContext) {
 		chatListProvider.searchChatList();
 	});
 
-	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable);
+	let manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
+		manageAccount();
+	});
+
+	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable);
 }
 
 // This method is called when your extension is deactivated
