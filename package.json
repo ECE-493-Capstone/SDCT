@@ -1,7 +1,7 @@
 {
   "name": "sdct",
   "publisher": "493-W24-Team11",
-  "displayName": "Software Development Collaboration Tool",
+  "displayName": "Software Development Collaboration Tool (SDCT)",
   "description": "Communication tools for developers inside Visual Studio",
   "version": "0.0.1",
   "engines": {
@@ -15,8 +15,31 @@
   "contributes": {
     "commands": [
       {
-        "command": "SDCT.helloWorld",
+        "command": "sdct.helloWorld",
         "title": "Hello World"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sdct-view-container",
+          "title": "SDCT",
+          "icon": "media/sadcat.png"
+        }
+      ]
+    },
+    "views": {
+      "sdct-view-container": [
+        {
+          "id": "dashboard",
+          "name": "Dashboard"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "dashboard",
+        "contents": "[Login with GitHub](https://github.com/login)"
       }
     ]
   },
