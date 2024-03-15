@@ -3,7 +3,9 @@ import { UserAuth } from './UserAuth';
 
 interface ChatRoom {
   name: string;
-  description: string;
+  lastMessage: string;
+  pictureUri: vscode.Uri;
+  notificationCount: number;
 }
 
 export class DashboardProvider implements vscode.TreeDataProvider<ChatRoom> {
@@ -20,20 +22,27 @@ export class DashboardProvider implements vscode.TreeDataProvider<ChatRoom> {
   constructor(context: vscode.ExtensionContext) {
     this.authenticated = this.isAuthenticated(context);
 
-    this.data = [
-        { name: 'Room 1', description: 'Description of Room 1' },
-        { name: 'Room 2', description: 'Description of Room 2' },
-        { name: 'Room 3', description: 'Description of Room 3' }
-    ];
+    let data: ChatRoom[] = [];
+    for (let i = 0; i < 5; i++) {
+      data.push({
+        name: `Chat Room ${i}`,
+        lastMessage: `Last message ${i}`,
+        pictureUri: vscode.Uri.parse(`https://picsum.photos/seed/${i}/200/200`),
+        notificationCount: i
+      });
+    }
+    this.data = data;
   }
 
   getTreeItem(element: ChatRoom): vscode.TreeItem {
-    return {
-        label: element.name,
-        tooltip: element.description,
-        contextValue: 'chatRoom'
-    };
-  }
+    const treeItem = new vscode.TreeItem(element.name);
+    if (element.notificationCount > 0) {
+      treeItem.label += ` [${element.notificationCount}]`;
+    }
+    treeItem.iconPath = element.pictureUri;
+    treeItem.description = element.lastMessage;
+    return treeItem;
+}
 
   getChildren(): ChatRoom[] | Thenable<ChatRoom[]> {
     if (this.authenticated) {
