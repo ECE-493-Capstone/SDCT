@@ -5,6 +5,7 @@ import { get } from 'http';
 interface Chat {
   name: string;
   lastMessage: string;
+  lastMessageTime: Date;
   pictureUri: vscode.Uri;
   notificationCount: number;
 }
@@ -38,17 +39,19 @@ export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
 
   getChildren(): Chat[] | Thenable<Chat[]> {
     if (this.authenticated) {
-        return this.data;
+        return this.data.sort((a, b) => b.lastMessageTime.getTime() - a.lastMessageTime.getTime());
     }
     return [];
   }
 
   getMockData(): Chat[] {
     let data: Chat[] = [];
+    const now = new Date();
     for (let i = 0; i < 5; i++) {
       data.push({
         name: `Chat ${i}`,
         lastMessage: `Last message ${i}`,
+        lastMessageTime: new Date(now.getTime() + i * 60000 * 60 * 24),
         pictureUri: vscode.Uri.parse(`https://picsum.photos/seed/${i+1}/200/200`),
         notificationCount: i
       });
