@@ -6,6 +6,7 @@ import { ProfileProvider } from './ProfileProvider';
 import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
 import { Credentials } from './credentials';
+import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -55,6 +56,10 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	let manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
 		manageAccount();
+	});
+
+	let showHelloWorldCommand = vscode.commands.registerCommand("sdct.openWeb", () => {
+		HelloWorldPanel.render(context.extensionUri);
 	});
 
 	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable);
