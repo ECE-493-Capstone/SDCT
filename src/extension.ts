@@ -5,14 +5,18 @@ import { ChatListProvider } from './ChatListProvider';
 import { ProfileProvider } from './ProfileProvider';
 import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
-import { log } from 'console';
+import { Credentials } from './credentials';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "SDCT" is now active!');
+	context.globalState.update('userAuth', undefined);
+
+	const credentials = new Credentials();
+	await credentials.initialize(context);
 
 	const chatListProvider = new ChatListProvider(context);
 	vscode.window.createTreeView('chatList', {
@@ -26,11 +30,13 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let loginDisposable = vscode.commands.registerCommand('sdct.login', () => {
+	let loginDisposable = vscode.commands.registerCommand('sdct.login', async () => {
 		// The code you place here will be executed every time your command is executed
+		const octokit = await credentials.setOctokit();
+		const userInfo = await octokit.users.getAuthenticated();
 		const userAuth: UserAuth = {
-			username: 'user01',
-			pictureUri: 'https://picsum.photos/seed/10/200/200'
+			username: userInfo.data.login,
+			pictureUri: userInfo.data.avatar_url
 		};
 		context.globalState.update('userAuth', userAuth);
 		chatListProvider.refresh(context);
