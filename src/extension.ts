@@ -6,7 +6,7 @@ import { ProfileProvider } from './ProfileProvider';
 import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
 import { Credentials } from './credentials';
-import { HelloWorldPanel } from "./panels/HelloWorldPanel";
+import { ChatRoomPanel } from './panels/ChatRoomPanel';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let loginDisposable = vscode.commands.registerCommand('sdct.login', async () => {
+	const loginDisposable = vscode.commands.registerCommand('sdct.login', async () => {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
@@ -44,25 +44,25 @@ export async function activate(context: vscode.ExtensionContext) {
 		profileProvider.refresh(context);
 	});
 
-	let logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
+	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
 		context.globalState.update('userAuth', undefined);
 		chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	});
 
-	let searchChatDisposable = vscode.commands.registerCommand('sdct.searchChat', () => {
+	const searchChatDisposable = vscode.commands.registerCommand('sdct.searchChat', () => {
 		chatListProvider.searchChatList();
 	});
 
-	let manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
+	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
 		manageAccount();
 	});
 
-	let showHelloWorldCommand = vscode.commands.registerCommand("sdct.openWeb", () => {
-		HelloWorldPanel.render(context.extensionUri);
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", () => {
+		ChatRoomPanel.render(context.extensionUri);
 	});
 
-	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable);
+	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);
 }
 
 // This method is called when your extension is deactivated

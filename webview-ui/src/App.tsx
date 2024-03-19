@@ -1,20 +1,28 @@
 import { vscode } from "./utilities/vscode";
-import { VSCodeButton } from "@vscode/webview-ui-toolkit/react";
+import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  function handleHowdyClick() {
-    vscode.postMessage({
-      command: "hello",
-      text: "Hey there partner! 🤠",
-    });
+  const [message, setMessage] = useState("");
+  const [messageHistory, setMessageHistory] = useState<string[]>([]);
+
+  function handleSendMessage() {
+    let newMessageHistory = [...messageHistory];
+    newMessageHistory.push(message);
+    setMessageHistory(newMessageHistory);
   }
 
   return (
     <main>
-      <h1>Hello World!</h1>
-      <VSCodeButton onClick={handleHowdyClick}>Howdy!</VSCodeButton>
-      <VSCodeButton onClick={handleHowdyClick}>More button</VSCodeButton>
+      <VSCodeTextField value={message} onInput={e => {
+        const target = e.target as HTMLInputElement;
+        setMessage(target.value);
+      }}/>
+      <VSCodeButton onClick={handleSendMessage}>Send</VSCodeButton>
+      {messageHistory.map((message, index) => (
+        <p key={index}>{message}</p>
+      ))}
     </main>
   );
 }
