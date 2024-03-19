@@ -34,6 +34,11 @@ export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
     }
     treeItem.iconPath = element.pictureUri;
     treeItem.description = element.lastMessage;
+    treeItem.command = {
+      command: 'sdct.openChatRoom',
+      title: 'chatListItemClicked',
+      arguments: [element.name]
+    };
     return treeItem;
   }
 

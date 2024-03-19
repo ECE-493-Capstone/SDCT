@@ -58,8 +58,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccount();
 	});
 
-	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", () => {
-		ChatRoomPanel.render(context.extensionUri);
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (username: string) => {
+		ChatRoomPanel.render(context.extensionUri, username);
 	});
 
 	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);

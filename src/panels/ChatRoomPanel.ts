@@ -33,7 +33,7 @@ export class ChatRoomPanel {
    *
    * @param extensionUri The URI of the directory containing the extension.
    */
-  public static render(extensionUri: Uri) {
+  public static render(extensionUri: Uri, username: string) {
     if (ChatRoomPanel.currentPanel) {
       // If the webview panel already exists reveal it
       ChatRoomPanel.currentPanel._panel.reveal(ViewColumn.One);
@@ -43,7 +43,7 @@ export class ChatRoomPanel {
         // Panel view type
         "showHelloWorld",
         // Panel title
-        "Chat 1",
+        username,
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
