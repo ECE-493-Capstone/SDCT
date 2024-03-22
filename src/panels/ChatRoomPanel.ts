@@ -7,6 +7,7 @@ export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
   private readonly _panel: WebviewPanel;
   private _disposables: Disposable[] = [];
+  private _id: string = "";
 
   public getPanel(): WebviewPanel {
     return this._panel;
@@ -18,8 +19,9 @@ export class ChatRoomPanel {
    * @param panel A reference to the webview panel
    * @param extensionUri The URI of the directory containing the extension
    */
-  private constructor(panel: WebviewPanel, extensionUri: Uri) {
+  private constructor(panel: WebviewPanel, extensionUri: Uri, id: string) {
     this._panel = panel;
+    this._id = id;
 
     // Set an event listener to listen for when the panel is disposed (i.e. when the user closes
     // the panel or when the panel is closed programmatically)
@@ -64,7 +66,7 @@ export class ChatRoomPanel {
         }
       );
 
-      ChatRoomPanel.currentPanels.set(chatRoom.friendUsername, new ChatRoomPanel(panel, extensionUri));
+      ChatRoomPanel.currentPanels.set(chatRoom.friendUsername, new ChatRoomPanel(panel, extensionUri, chatRoom.friendUsername));
       panel.webview.postMessage({ command: "init", chatRoom });
     }
   }
@@ -73,7 +75,7 @@ export class ChatRoomPanel {
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
-    ChatRoomPanel.currentPanels.delete(this._panel.title);
+    ChatRoomPanel.currentPanels.delete(this._id);
 
     // Dispose of the current webview panel
     this._panel.dispose();
