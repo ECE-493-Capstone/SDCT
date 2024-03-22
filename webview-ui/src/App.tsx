@@ -55,7 +55,6 @@ function App() {
 
   return (
     <main>
-      <h1>I ({user}) is talking to {friend} </h1>
       {messageHistory.map((message, index) => (
         <div key={index} style={{ textAlign: message.sender === user ? 'left' : 'right' }}>
           <span>{message.text} </span>
