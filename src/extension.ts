@@ -6,7 +6,7 @@ import { ProfileProvider } from './ProfileProvider';
 import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
 import { Credentials } from './credentials';
-import { ChatRoomPanel } from './panels/ChatRoomPanel';
+import { ChatRoomPanel, IChatRoom } from './panels/ChatRoomPanel';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -58,8 +58,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccount();
 	});
 
-	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (username: string) => {
-		ChatRoomPanel.render(context.extensionUri, username);
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
+		const userAuth = context.globalState.get<UserAuth>('userAuth');
+		const username = userAuth ? userAuth.username : "";
+		const chatRoom: IChatRoom = {friendUsername, username};
+		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
 	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);

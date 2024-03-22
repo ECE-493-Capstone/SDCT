@@ -2,6 +2,11 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vsco
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 
+export interface IChatRoom {
+  friendUsername: string;
+  username: string;
+}
+
 export class ChatRoomPanel {
   public static currentPanel: ChatRoomPanel | undefined;
   private readonly _panel: WebviewPanel;
@@ -33,7 +38,7 @@ export class ChatRoomPanel {
    *
    * @param extensionUri The URI of the directory containing the extension.
    */
-  public static render(extensionUri: Uri, username: string) {
+  public static render(extensionUri: Uri, chatRoom: IChatRoom) {
     if (ChatRoomPanel.currentPanel) {
       // If the webview panel already exists reveal it
       ChatRoomPanel.currentPanel._panel.reveal(ViewColumn.One);
@@ -41,9 +46,9 @@ export class ChatRoomPanel {
       // If a webview panel does not already exist create and show a new one
       const panel = window.createWebviewPanel(
         // Panel view type
-        "showHelloWorld",
+        "showChatRoom",
         // Panel title
-        username,
+        chatRoom.friendUsername,
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
@@ -56,6 +61,7 @@ export class ChatRoomPanel {
       );
 
       ChatRoomPanel.currentPanel = new ChatRoomPanel(panel, extensionUri);
+      panel.webview.postMessage({ command: "init", chatRoom });
     }
   }
 
