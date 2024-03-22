@@ -6,7 +6,8 @@ import { ProfileProvider } from './ProfileProvider';
 import { manageAccount } from './ManageAccount';
 import { UserAuth } from './UserAuth';
 import { Credentials } from './credentials';
-import { ChatRoomPanel, IChatRoom } from './panels/ChatRoomPanel';
+import { ChatRoomPanel } from './panels/ChatRoomPanel';
+import { IChatRoom } from './interfaces/IChatRoom';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed

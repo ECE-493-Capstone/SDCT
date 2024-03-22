@@ -12,8 +12,8 @@ interface Message {
 function App() {
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
-  const [user, setUser] = useState<string>(""); // TODO: Get user from vscode API
-  const [friend, setFriend] = useState<string>(""); // TODO: Get friend from vscode API
+  const [user, setUser] = useState<string>("");
+  const [friend, setFriend] = useState<string>("");
 
   useEffect(() => {
     window.addEventListener('message', event => {

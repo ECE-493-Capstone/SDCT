@@ -1,16 +1,16 @@
 import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
-
-export interface IChatRoom {
-  friendUsername: string;
-  username: string;
-}
+import { IChatRoom } from "../interfaces/IChatRoom";
 
 export class ChatRoomPanel {
-  public static currentPanel: ChatRoomPanel | undefined;
+  public static currentPanels: Map<string, ChatRoomPanel> = new Map();
   private readonly _panel: WebviewPanel;
   private _disposables: Disposable[] = [];
+
+  public getPanel(): WebviewPanel {
+    return this._panel;
+  }
 
   /**
    * The ChatRoomPanel class private constructor (called only from the render method).
@@ -39,9 +39,12 @@ export class ChatRoomPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    if (ChatRoomPanel.currentPanel) {
+    if (ChatRoomPanel.currentPanels.has(chatRoom.friendUsername)) {
       // If the webview panel already exists reveal it
-      ChatRoomPanel.currentPanel._panel.reveal(ViewColumn.One);
+      const panel = ChatRoomPanel.currentPanels.get(chatRoom.friendUsername);
+      if (!!panel) {
+        panel._panel.reveal(ViewColumn.One);
+      }
     } else {
       // If a webview panel does not already exist create and show a new one
       const panel = window.createWebviewPanel(
@@ -55,12 +58,13 @@ export class ChatRoomPanel {
         {
           // Enable JavaScript in the webview
           enableScripts: true,
+          retainContextWhenHidden: true,
           // Restrict the webview to only load resources from the `out` and `webview-ui/build` directories
           localResourceRoots: [Uri.joinPath(extensionUri, "out"), Uri.joinPath(extensionUri, "webview-ui/build")],
         }
       );
 
-      ChatRoomPanel.currentPanel = new ChatRoomPanel(panel, extensionUri);
+      ChatRoomPanel.currentPanels.set(chatRoom.friendUsername, new ChatRoomPanel(panel, extensionUri));
       panel.webview.postMessage({ command: "init", chatRoom });
     }
   }
@@ -69,7 +73,7 @@ export class ChatRoomPanel {
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
-    ChatRoomPanel.currentPanel = undefined;
+    ChatRoomPanel.currentPanels.delete(this._panel.title);
 
     // Dispose of the current webview panel
     this._panel.dispose();
