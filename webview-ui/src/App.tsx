@@ -1,6 +1,7 @@
 import { vscode } from "./utilities/vscode";
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 import { useState, useEffect } from "react";
+import { IChatRoomMenu } from "../../src/interfaces/IChatRoomMenu";
 import "./App.css";
 
 interface Message {
@@ -14,6 +15,7 @@ function App() {
   const [messageHistory, setMessageHistory] = useState<Message[]>([]);
   const [user, setUser] = useState<string>("");
   const [friend, setFriend] = useState<string>("");
+  const [isGroupChat, setIsGroupChat] = useState<boolean>(false);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -39,6 +41,18 @@ function App() {
     setMessage("");
   };
 
+  const handleOpenMenu = () => {
+    const chatRoomMenu: IChatRoomMenu = {
+      isGroupChat,
+      joinedVoiceChat: false,
+      joinedCodeSession: false,
+    };
+    vscode.postMessage({
+      command: 'openChatRoomMenu',
+      chatRoomMenu,
+    });
+  };
+
   const getTimeFormatted = (date: Date) => {
     let hours = date.getHours();
     let minutes: number | string = date.getMinutes();
@@ -61,6 +75,7 @@ function App() {
           <span>{getTimeFormatted(message.timestamp)}</span>
         </div>
       ))}
+      <VSCodeButton appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
       <form onSubmit={handleSendMessage}>
         <VSCodeTextField value={message} onInput={e => {
           const target = e.target as HTMLInputElement;

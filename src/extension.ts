@@ -9,6 +9,7 @@ import { Credentials } from './credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './ChatMenu';
+import { IChatRoomMenu } from './interfaces/IChatRoomMenu';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -67,11 +68,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoom: IChatRoom) => {
-		const isGroupChat = true;
-		const joinedVoiceChat = false;
-		const joinedCodeSession = false;
-		chatMenu(isGroupChat, joinedVoiceChat, joinedCodeSession);
+	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoomMenu: IChatRoomMenu) => {
+		chatMenu(chatRoomMenu.isGroupChat, chatRoomMenu.joinedVoiceChat, chatRoomMenu.joinedCodeSession);
 	});
 
 	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);

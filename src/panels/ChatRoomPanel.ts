@@ -1,7 +1,8 @@
-import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn } from "vscode";
+import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } from "vscode";
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
+import { IChatRoomMenu } from "../interfaces/IChatRoomMenu";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
@@ -138,9 +139,12 @@ export class ChatRoomPanel {
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
-        const text = message.text;
 
-        switch (command) {}
+        switch (command) {
+          case "openChatRoomMenu":
+            const chatRoomMenu: IChatRoomMenu = message.chatRoomMenu;
+            commands.executeCommand('sdct.openChatRoomMenu', [chatRoomMenu]);
+        }
       },
       undefined,
       this._disposables
