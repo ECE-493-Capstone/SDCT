@@ -2,17 +2,12 @@ import { vscode } from "./utilities/vscode";
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 import { useState, useEffect } from "react";
 import { IChatRoomMenu } from "../../src/interfaces/IChatRoomMenu";
+import { IMessage } from "../../src/interfaces/IMessage";
 import "./App.css";
-
-interface Message {
-  text: string;
-  timestamp: Date;
-  sender: string;
-}
 
 function App() {
   const [message, setMessage] = useState("");
-  const [messageHistory, setMessageHistory] = useState<Message[]>([]);
+  const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
   const [user, setUser] = useState<string>("");
   const [friend, setFriend] = useState<string>("");
   const [isGroupChat, setIsGroupChat] = useState<boolean>(false);
