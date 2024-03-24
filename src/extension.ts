@@ -5,7 +5,7 @@ import { ChatListProvider } from './providers/ChatListProvider';
 import { ProfileProvider } from './providers/ProfileProvider';
 import { manageAccount } from './services/ManageAccount';
 import { IUserAuth } from './interfaces/IUserAuth';
-import { Credentials } from './services/credentials';
+import { Credentials } from './services/Credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';

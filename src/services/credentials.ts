@@ -39,9 +39,9 @@ export class Credentials {
 		 * If any session changes occur logout
 		 */
 		context.subscriptions.push(vscode.authentication.onDidChangeSessions(async e => {
-			const session = await vscode.authentication.getSession(GITHUB_AUTH_PROVIDER_ID, [], { createIfNone: false, silent: true })
+			const session = await vscode.authentication.getSession(GITHUB_AUTH_PROVIDER_ID, [], { createIfNone: false, silent: true });
 			if(session === undefined){
-				vscode.commands.executeCommand("sdct.logout")
+				vscode.commands.executeCommand("sdct.logout");
 				this.octokit = undefined;
 			}
 		},));
