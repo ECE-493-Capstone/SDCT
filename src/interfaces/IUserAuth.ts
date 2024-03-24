@@ -1,4 +1,4 @@
-export interface UserAuth {
+export interface IUserAuth {
     username: string;
     pictureUri?: string;
 }

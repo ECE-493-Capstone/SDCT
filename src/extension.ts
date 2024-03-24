@@ -1,14 +1,14 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { ChatListProvider } from './ChatListProvider';
-import { ProfileProvider } from './ProfileProvider';
-import { manageAccount } from './ManageAccount';
-import { UserAuth } from './UserAuth';
-import { Credentials } from './credentials';
+import { ChatListProvider } from './providers/ChatListProvider';
+import { ProfileProvider } from './providers/ProfileProvider';
+import { manageAccount } from './services/ManageAccount';
+import { IUserAuth } from './interfaces/IUserAuth';
+import { Credentials } from './services/credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
-import { chatMenu } from './ChatMenu';
+import { chatMenu } from './services/ChatMenu';
 import { IChatRoomMenu } from './interfaces/IChatRoomMenu';
 
 // This method is called when your extension is activated
@@ -38,7 +38,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
-		const userAuth: UserAuth = {
+		const userAuth: IUserAuth = {
 			username: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
@@ -62,7 +62,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
-		const userAuth = context.globalState.get<UserAuth>('userAuth');
+		const userAuth = context.globalState.get<IUserAuth>('userAuth');
 		const username = userAuth ? userAuth.username : "";
 		const chatRoom: IChatRoom = {friendUsername, username};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);

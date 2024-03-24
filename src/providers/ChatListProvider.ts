@@ -1,33 +1,26 @@
 import * as vscode from 'vscode';
-import { UserAuth } from './UserAuth';
+import { IUserAuth } from '../interfaces/IUserAuth';
 import { get } from 'http';
+import { IChat } from '../interfaces/IChat';
 
-interface Chat {
-  name: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  pictureUri: vscode.Uri;
-  notificationCount: number;
-}
-
-export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
-  private data: Chat[];
+export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
+  private data: IChat[];
   private authenticated: boolean;
   private searchQuery: string | undefined;
-  private _onDidChangeTreeData: vscode.EventEmitter<Chat | undefined | null | void> = new vscode.EventEmitter<Chat | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<Chat | undefined | null | void> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<IChat | undefined | null | void> = new vscode.EventEmitter<IChat | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
 
   refresh(context: vscode.ExtensionContext): void {
-    this.authenticated = !!context.globalState.get<UserAuth>('userAuth');
+    this.authenticated = !!context.globalState.get<IUserAuth>('userAuth');
     this._onDidChangeTreeData.fire();
   }
 
   constructor(context: vscode.ExtensionContext) {
-    this.authenticated = !!context.globalState.get<UserAuth>('userAuth');
+    this.authenticated = !!context.globalState.get<IUserAuth>('userAuth');
     this.data = this.getMockData();
   }
 
-  getTreeItem(element: Chat): vscode.TreeItem {
+  getTreeItem(element: IChat): vscode.TreeItem {
     const treeItem = new vscode.TreeItem(element.name);
     if (element.notificationCount > 0) {
       treeItem.label += ` [${element.notificationCount}]`;
@@ -42,15 +35,15 @@ export class ChatListProvider implements vscode.TreeDataProvider<Chat> {
     return treeItem;
   }
 
-  getChildren(): Chat[] | Thenable<Chat[]> {
+  getChildren(): IChat[] | Thenable<IChat[]> {
     if (this.authenticated) {
         return this.data.sort((a, b) => b.lastMessageTime.getTime() - a.lastMessageTime.getTime());
     }
     return [];
   }
 
-  getMockData(): Chat[] {
-    let data: Chat[] = [];
+  getMockData(): IChat[] {
+    let data: IChat[] = [];
     const now = new Date();
     for (let i = 0; i < 5; i++) {
       data.push({
