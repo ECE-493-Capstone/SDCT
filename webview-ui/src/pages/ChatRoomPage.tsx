@@ -1,7 +1,7 @@
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
-import { IChatRoomMenu } from "../../../src/interfaces/IChatRoomMenu";
+import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 
 function ChatRoomPage() {
@@ -15,7 +15,7 @@ function ChatRoomPage() {
     window.addEventListener('message', event => {
       const message = event.data;
       switch (message.command) {
-        case 'init':
+        case 'initChatRoom':
           setUser(message.chatRoom.username);
           setFriend(message.chatRoom.friendUsername);
           break;
@@ -36,14 +36,16 @@ function ChatRoomPage() {
   };
 
   const handleOpenMenu = () => {
-    const chatRoomMenu: IChatRoomMenu = {
+    const chatRoom: IChatRoom = {
+      friendUsername: friend,
+      username: user,
       isGroupChat,
       joinedVoiceChat: false,
       joinedCodeSession: false,
     };
     vscode.postMessage({
       command: 'openChatRoomMenu',
-      chatRoomMenu,
+      chatRoom,
     });
   };
 

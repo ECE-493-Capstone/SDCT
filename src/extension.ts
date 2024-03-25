@@ -7,9 +7,9 @@ import { manageAccount } from './services/ManageAccount';
 import { IUserAuth } from './interfaces/IUserAuth';
 import { Credentials } from './services/Credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
+import { VoiceChatPanel } from './panels/VoiceChatPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
-import { IChatRoomMenu } from './interfaces/IChatRoomMenu';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -64,15 +64,27 @@ export async function activate(context: vscode.ExtensionContext) {
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
 		const userAuth = context.globalState.get<IUserAuth>('userAuth');
 		const username = userAuth ? userAuth.username : "";
-		const chatRoom: IChatRoom = {friendUsername, username};
+		const chatRoom: IChatRoom = {friendUsername, username, isGroupChat: false, joinedVoiceChat: false, joinedCodeSession: false};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoomMenu: IChatRoomMenu) => {
-		chatMenu(chatRoomMenu.isGroupChat, chatRoomMenu.joinedVoiceChat, chatRoomMenu.joinedCodeSession);
+	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoom: IChatRoom) => {
+		chatMenu(chatRoom);
 	});
 
-	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);
+	const openVoiceChatDisposable = vscode.commands.registerCommand("sdct.openVoiceChat", (chatRoom: IChatRoom) => {
+		VoiceChatPanel.render(context.extensionUri, chatRoom);
+	});
+
+	context.subscriptions.push(
+		loginDisposable,
+		logoutDisposable, 
+		searchChatDisposable, 
+		manageAccountDisposable, 
+		openChatRoomDisposable, 
+		openChatRoomMenuDisposable, 
+		openVoiceChatDisposable
+	);
 }
 
 // This method is called when your extension is deactivated

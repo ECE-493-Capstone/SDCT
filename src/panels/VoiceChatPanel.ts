@@ -2,9 +2,10 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } 
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
+import { EPage } from "../enums/EPage";
 
-export class ChatRoomPanel {
-  public static currentPanels: Map<string, ChatRoomPanel> = new Map();
+export class VoiceChatPanel {
+  public static currentPanels: Map<string, VoiceChatPanel> = new Map();
   private readonly _panel: WebviewPanel;
   private _disposables: Disposable[] = [];
   private _id: string = "";
@@ -14,7 +15,7 @@ export class ChatRoomPanel {
   }
 
   /**
-   * The ChatRoomPanel class private constructor (called only from the render method).
+   * The VoiceChatPanel class private constructor (called only from the render method).
    *
    * @param panel A reference to the webview panel
    * @param extensionUri The URI of the directory containing the extension
@@ -41,9 +42,9 @@ export class ChatRoomPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    if (ChatRoomPanel.currentPanels.has(chatRoom.friendUsername)) {
+    if (VoiceChatPanel.currentPanels.has(chatRoom.friendUsername)) {
       // If the webview panel already exists reveal it
-      const panel = ChatRoomPanel.currentPanels.get(chatRoom.friendUsername);
+      const panel = VoiceChatPanel.currentPanels.get(chatRoom.friendUsername);
       if (!!panel) {
         panel._panel.reveal(ViewColumn.One);
       }
@@ -51,9 +52,9 @@ export class ChatRoomPanel {
       // If a webview panel does not already exist create and show a new one
       const panel = window.createWebviewPanel(
         // Panel view type
-        "showChatRoom",
+        "showVoiceChat",
         // Panel title
-        chatRoom.friendUsername,
+        `VC: ${chatRoom.friendUsername}`,
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
@@ -66,8 +67,9 @@ export class ChatRoomPanel {
         }
       );
 
-      ChatRoomPanel.currentPanels.set(chatRoom.friendUsername, new ChatRoomPanel(panel, extensionUri, chatRoom.friendUsername));
-      panel.webview.postMessage({ command: "initChatRoom", chatRoom });
+      VoiceChatPanel.currentPanels.set(chatRoom.friendUsername, new VoiceChatPanel(panel, extensionUri, chatRoom.friendUsername));
+      panel.webview.postMessage({ command: "route", page: EPage.VoiceChat});
+      panel.webview.postMessage({ command: "init", chatRoom });
     }
   }
 
@@ -75,7 +77,7 @@ export class ChatRoomPanel {
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
-    ChatRoomPanel.currentPanels.delete(this._id);
+    VoiceChatPanel.currentPanels.delete(this._id);
 
     // Dispose of the current webview panel
     this._panel.dispose();
@@ -139,11 +141,7 @@ export class ChatRoomPanel {
       (message: any) => {
         const command = message.command;
 
-        switch (command) {
-          case "openChatRoomMenu":
-            const chatRoom: IChatRoom = message.chatRoom;
-            commands.executeCommand('sdct.openChatRoomMenu', chatRoom);
-        }
+        switch (command) {}
       },
       undefined,
       this._disposables

@@ -1,18 +1,19 @@
 import * as vscode from 'vscode';
+import { IChatRoom } from '../interfaces/IChatRoom';
 
-export async function chatMenu(isGroupChat: boolean, joinedVoiceChat: boolean, joinedCodeSession: boolean) {
+export async function chatMenu(chatRoom: IChatRoom) {
     const options = [
         "Send Media", 
         "Send File", 
         "Send Code Message"
     ];
-    if (isGroupChat) {
+    if (chatRoom.isGroupChat) {
         options.push("Leave Group");
     }
-    if (!joinedVoiceChat) {
+    if (!chatRoom.joinedVoiceChat) {
         options.push("Join Voice Chat");
     }
-    if (!joinedCodeSession) {
+    if (!chatRoom.joinedCodeSession) {
         options.push("Join Code Session");
     }
     const chosenOption = await vscode.window.showQuickPick(options);
@@ -26,9 +27,13 @@ export async function chatMenu(isGroupChat: boolean, joinedVoiceChat: boolean, j
         } else if (chosenOption === "Leave Group") {
             return;
         } else if (chosenOption === "Join Voice Chat") {
-            return;
+            joinVoiceChat(chatRoom)
         } else if (chosenOption === "Join Code Session") {
             return;
         }
     }
 }
+
+const joinVoiceChat = (chatRoom: IChatRoom) => {
+    vscode.commands.executeCommand("sdct.openVoiceChat", chatRoom);
+};
