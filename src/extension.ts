@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { ChatListProvider } from './providers/ChatListProvider';
 import { ProfileProvider } from './providers/ProfileProvider';
 import { manageAccount } from './services/ManageAccount';
-import { IUserAuth } from './interfaces/IUserAuth';
+import { IUser } from './interfaces/IUser';
 import { Credentials } from './services/Credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { VoiceChatPanel } from './panels/VoiceChatPanel';
@@ -38,9 +38,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
-		const userAuth: IUserAuth = {
-			username: userInfo.data.login,
-			pictureUri: userInfo.data.avatar_url
+		const userAuth: IUser = {
+			name: userInfo.data.login,
+			pictureUri: vscode.Uri.parse(userInfo.data.avatar_url)
 		};
 		context.globalState.update('userAuth', userAuth);
 		chatListProvider.refresh(context);
@@ -62,8 +62,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
-		const userAuth = context.globalState.get<IUserAuth>('userAuth');
-		const username = userAuth ? userAuth.username : "";
+		const userAuth = context.globalState.get<IUser>('userAuth');
+		const username = userAuth ? userAuth.name : "";
 		const chatRoom: IChatRoom = {friendUsername, username, isGroupChat: false, joinedVoiceChat: false, joinedCodeSession: false};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});

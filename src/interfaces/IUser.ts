@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export interface IProfile {
+export interface IUser {
     name: string;
     pictureUri: vscode.Uri;
 }

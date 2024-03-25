@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { IUserAuth } from '../interfaces/IUserAuth';
+import { IUser } from '../interfaces/IUser';
 import { get } from 'http';
 import { IChat } from '../interfaces/IChat';
 
@@ -11,12 +11,12 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
 
   refresh(context: vscode.ExtensionContext): void {
-    this.authenticated = !!context.globalState.get<IUserAuth>('userAuth');
+    this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this._onDidChangeTreeData.fire();
   }
 
   constructor(context: vscode.ExtensionContext) {
-    this.authenticated = !!context.globalState.get<IUserAuth>('userAuth');
+    this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this.data = this.getMockData();
   }
 
