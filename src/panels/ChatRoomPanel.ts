@@ -2,6 +2,7 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } 
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
+import { EPage } from "../enums/EPage";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
@@ -67,6 +68,7 @@ export class ChatRoomPanel {
       );
 
       ChatRoomPanel.currentPanels.set(chatRoom.friendUsername, new ChatRoomPanel(panel, extensionUri, chatRoom.friendUsername));
+      panel.webview.postMessage({ command: "route", page: EPage.ChatRoom});
       panel.webview.postMessage({ command: "initChatRoom", chatRoom });
     }
   }

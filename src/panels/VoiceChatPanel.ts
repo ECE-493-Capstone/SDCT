@@ -69,7 +69,6 @@ export class VoiceChatPanel {
 
       VoiceChatPanel.currentPanels.set(chatRoom.friendUsername, new VoiceChatPanel(panel, extensionUri, chatRoom.friendUsername));
       panel.webview.postMessage({ command: "route", page: EPage.VoiceChat});
-      panel.webview.postMessage({ command: "init", chatRoom });
     }
   }
 
