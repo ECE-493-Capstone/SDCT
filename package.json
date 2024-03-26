@@ -35,6 +35,18 @@
       {
         "command": "sdct.openChatRoom",
         "title": "SDCT: Open Chat"
+      },
+      {
+        "command": "sdct.openChatRoomMenu",
+        "title": "SDCT: Open Chat Menu"
+      },
+      {
+        "command": "sdct.openVoiceChat",
+        "title": "SDCT: Open Voice Chat"
+      },
+      {
+        "command": "sdct.openCodeSession",
+        "title": "SDCT: Open Code Session"
       }
     ],
     "viewsContainers": {

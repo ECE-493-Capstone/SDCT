@@ -1,13 +1,17 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { ChatListProvider } from './ChatListProvider';
-import { ProfileProvider } from './ProfileProvider';
-import { manageAccount } from './ManageAccount';
-import { UserAuth } from './UserAuth';
-import { Credentials } from './credentials';
+import { ChatListProvider } from './providers/ChatListProvider';
+import { ProfileProvider } from './providers/ProfileProvider';
+import { manageAccount } from './services/ManageAccount';
+import { IUser } from './interfaces/IUser';
+import { Credentials } from './services/Credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
+import { VoiceChatPanel } from './panels/VoiceChatPanel';
+import { CodeSessionPanel } from './panels/CodeSessionPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
+import { chatMenu } from './services/ChatMenu';
+import { IChat } from './interfaces/IChat';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -36,8 +40,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
-		const userAuth: UserAuth = {
-			username: userInfo.data.login,
+		const userAuth: IUser = {
+			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
 		context.globalState.update('userAuth', userAuth);
@@ -59,14 +63,52 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccount();
 	});
 
-	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
-		const userAuth = context.globalState.get<UserAuth>('userAuth');
-		const username = userAuth ? userAuth.username : "";
-		const chatRoom: IChatRoom = {friendUsername, username};
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
+		const userAuth = context.globalState.get<IUser>('userAuth');
+		const emptyUser: IUser = { name: "", pictureUri: "" };
+		const user = userAuth ? userAuth : emptyUser;
+		const friends: IUser[] = [];
+		if (chat.groupId) {
+			for (let i = 0; i < 3; i++) { // MOCK DATA
+				const friend: IUser = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
+				friends.push(friend);
+			}
+		} else {
+			const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };
+			friends.push(friend);
+		}
+		const chatRoom: IChatRoom = {
+			user,
+			friends,
+			joinedVoiceChat: false, 
+			joinedCodeSession: false,
+			groupId: chat.groupId
+		};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
-	context.subscriptions.push(loginDisposable,logoutDisposable, searchChatDisposable, manageAccountDisposable, openChatRoomDisposable);
+	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoom: IChatRoom) => {
+		chatMenu(chatRoom);
+	});
+
+	const openVoiceChatDisposable = vscode.commands.registerCommand("sdct.openVoiceChat", (chatRoom: IChatRoom) => {
+		VoiceChatPanel.render(context.extensionUri, chatRoom);
+	});
+
+	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
+		CodeSessionPanel.render(context.extensionUri, chatRoom);
+	});
+
+	context.subscriptions.push(
+		loginDisposable,
+		logoutDisposable, 
+		searchChatDisposable, 
+		manageAccountDisposable, 
+		openChatRoomDisposable, 
+		openChatRoomMenuDisposable, 
+		openVoiceChatDisposable,
+		openCodeSessionDisposable
+	);
 }
 
 // This method is called when your extension is deactivated
