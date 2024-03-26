@@ -19,6 +19,11 @@ function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
         <img key={friend.name} src={friend.pictureUri} width="100" />
       ))}
       <br/>
+      <span>{chatRoom?.user.name + "\t"}</span>
+      {chatRoom?.friends.map(friend => (
+        <span key={friend.name}>{friend.name + "\t"}</span>
+      ))}
+      <br/>
       <VSCodeButton appearance="secondary" onClick={handleMute}>Mute</VSCodeButton>
       <VSCodeButton appearance="primary" onClick={handleEndCall}>End Call</VSCodeButton>
     </main>
