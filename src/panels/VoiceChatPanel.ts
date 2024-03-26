@@ -70,6 +70,7 @@ export class VoiceChatPanel {
 
       VoiceChatPanel.currentPanels.set(chatRoomName, new VoiceChatPanel(panel, extensionUri, chatRoomName));
       panel.webview.postMessage({ command: "route", page: EPage.VoiceChat});
+      panel.webview.postMessage({ command: "initChatRoom", chatRoom });
     }
   }
 
@@ -117,9 +118,8 @@ export class VoiceChatPanel {
         <head>
           <meta charset="UTF-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
           <link rel="stylesheet" type="text/css" href="${stylesUri}">
-          <title>Hello World</title>
+          <title>Voice Chat</title>
         </head>
         <body>
           <div id="root"></div>

@@ -4,9 +4,11 @@ import { EPage } from "../../src/enums/EPage";
 import "./App.css";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import VoiceChatPage from "./pages/VoiceChatPage";
+import { IChatRoom } from "../../src/interfaces/IChatRoom";
 
 function App() {
   const [page, setPage] = useState<EPage>(EPage.ChatRoom);
+  const [chatRoom, setChatRoom] = useState<IChatRoom>();
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -15,6 +17,9 @@ function App() {
         case 'route':
           setPage(message.page);
           break;
+        case 'initChatRoom':
+          setChatRoom(message.chatRoom);
+          break;
       };
     });
   }, []);
@@ -22,7 +27,7 @@ function App() {
   return (
     <main>
       {page === EPage.ChatRoom && <ChatRoomPage />}
-      {page === EPage.VoiceChat && <VoiceChatPage />}
+      {page === EPage.VoiceChat && <VoiceChatPage chatRoom={chatRoom}/>}
     </main>
   );
 }
