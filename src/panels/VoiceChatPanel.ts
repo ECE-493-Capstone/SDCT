@@ -141,7 +141,11 @@ export class VoiceChatPanel {
       (message: any) => {
         const command = message.command;
 
-        switch (command) {}
+        switch (command) {
+          case "endVoiceChat":
+            this.dispose();
+            break;
+        }
       },
       undefined,
       this._disposables

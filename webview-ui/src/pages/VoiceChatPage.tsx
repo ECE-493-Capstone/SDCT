@@ -9,7 +9,7 @@ function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
   };
 
   const handleEndCall = () => {
-    
+    vscode.postMessage({command: 'endVoiceChat'});
   };
 
   return (

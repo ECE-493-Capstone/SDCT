@@ -141,7 +141,11 @@ export class CodeSessionPanel {
       (message: any) => {
         const command = message.command;
 
-        switch (command) {}
+        switch (command) {
+          case "endCodeSession":
+            this.dispose();
+            break;
+        }
       },
       undefined,
       this._disposables

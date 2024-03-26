@@ -13,7 +13,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
   };
 
   const handleEndSession = () => {
-    
+    vscode.postMessage({command: 'endCodeSession'});
   };
 
   return (
