@@ -3,13 +3,10 @@ import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
-import { IUser } from "../../../src/interfaces/IUser";
 
 function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
-  const [user, setUser] = useState<IUser>(chatRoom.user);
-  const [friend, setFriend] = useState<IUser>(chatRoom.friends[0]);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,18 +37,18 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   }; 
 
   const mockSenderGenerator = () => {
-    const senders = [user, friend];
+    const senders = [chatRoom.user, ...chatRoom.friends];
     return senders[Math.floor(Math.random() * senders.length)];
   };
 
   return (
     <main>
       {messageHistory.map((message, index) => (
-        <div key={index} style={{ textAlign: message.sender !== user ? 'left' : 'right' }}>
-          {message.sender !== user ? <img src={message.sender.pictureUri} width="20" /> : null}
+        <div key={index} style={{ textAlign: message.sender !== chatRoom.user ? 'left' : 'right' }}>
+          {message.sender !== chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
           <span>{message.text} </span>
           <span>{getTimeFormatted(message.timestamp)}</span>
-          {message.sender === user ? <img src={message.sender.pictureUri} width="20" /> : null}
+          {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
       ))}
       <VSCodeButton appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>

@@ -5,4 +5,5 @@ export interface IChatRoom {
     friends: IUser[];
     joinedVoiceChat: boolean;
     joinedCodeSession: boolean;
+    groupId?: string;
 }

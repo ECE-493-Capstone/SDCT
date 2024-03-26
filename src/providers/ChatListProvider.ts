@@ -52,15 +52,16 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     let data: IChat[] = [];
     const now = new Date();
     for (let i = 0; i < 5; i++) {
+      const groupId = Math.random() > 0.75 ? `Group ${i}` : undefined;
       data.push({
-        name: `Chat ${i}`,
+        name: groupId ? groupId : `Friend ${i}`,
         lastMessage: `Last message ${i}`,
         lastMessageTime: new Date(now.getTime() + i * 60000 * 60 * 24),
         pictureUri: `https://picsum.photos/seed/${i+1}/200/200`,
         notificationCount: i,
-        isGroup: Math.random() > 0.5,
-        voiceChatActive: Math.random() > 0.5,
-        codeSessionActive: Math.random() > 0.5,
+        voiceChatActive: Math.random() > 0.75,
+        codeSessionActive: Math.random() > 0.75,
+        groupId,
       });
     }
     return data;

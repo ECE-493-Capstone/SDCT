@@ -4,7 +4,7 @@ export interface IChat {
     lastMessageTime: Date;
     pictureUri: string;
     notificationCount: number;
-    isGroup: boolean;
     voiceChatActive: boolean;
     codeSessionActive: boolean;
+    groupId?: string;
 }

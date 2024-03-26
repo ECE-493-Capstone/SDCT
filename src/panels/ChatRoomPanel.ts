@@ -14,6 +14,15 @@ export class ChatRoomPanel {
     return this._panel;
   }
 
+  public static getChatRoomName(chatRoom: IChatRoom): string {
+    if (chatRoom.groupId) {
+      const groupName = chatRoom.groupId; // FETCH ACTUAL GROUP NAME
+      return groupName;
+    } else {
+      return chatRoom.friends[0].name;
+    }
+  }
+
   /**
    * The ChatRoomPanel class private constructor (called only from the render method).
    *
@@ -42,10 +51,10 @@ export class ChatRoomPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomName = chatRoom.friends[0].name; // or get group ID
-    if (ChatRoomPanel.currentPanels.has(chatRoomName)) {
+    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    if (ChatRoomPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
-      const panel = ChatRoomPanel.currentPanels.get(chatRoomName);
+      const panel = ChatRoomPanel.currentPanels.get(chatRoomId);
       if (!!panel) {
         panel._panel.reveal(ViewColumn.One);
       }
@@ -55,7 +64,7 @@ export class ChatRoomPanel {
         // Panel view type
         "showChatRoom",
         // Panel title
-        chatRoomName,
+        this.getChatRoomName(chatRoom),
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
@@ -68,7 +77,7 @@ export class ChatRoomPanel {
         }
       );
 
-      ChatRoomPanel.currentPanels.set(chatRoomName, new ChatRoomPanel(panel, extensionUri, chatRoomName));
+      ChatRoomPanel.currentPanels.set(chatRoomId, new ChatRoomPanel(panel, extensionUri, chatRoomId));
       panel.webview.postMessage({ command: "route", page: EPage.ChatRoom});
       panel.webview.postMessage({ command: "initChatRoom", chatRoom });
     }

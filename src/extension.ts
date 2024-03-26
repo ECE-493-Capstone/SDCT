@@ -67,13 +67,22 @@ export async function activate(context: vscode.ExtensionContext) {
 		const userAuth = context.globalState.get<IUser>('userAuth');
 		const emptyUser: IUser = { name: "", pictureUri: "" };
 		const user = userAuth ? userAuth : emptyUser;
-		// If group, needs to fetch all members name and pictureUri
-		const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };
+		const friends: IUser[] = [];
+		if (chat.groupId) {
+			for (let i = 0; i < 3; i++) { // MOCK DATA
+				const friend: IUser = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
+				friends.push(friend);
+			}
+		} else {
+			const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };
+			friends.push(friend);
+		}
 		const chatRoom: IChatRoom = {
 			user,
-			friends: [friend],
+			friends,
 			joinedVoiceChat: false, 
-			joinedCodeSession: false
+			joinedCodeSession: false,
+			groupId: chat.groupId
 		};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
