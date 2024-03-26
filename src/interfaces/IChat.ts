@@ -5,4 +5,6 @@ export interface IChat {
     pictureUri: string;
     notificationCount: number;
     isGroup: boolean;
+    voiceChatActive: boolean;
+    codeSessionActive: boolean;
 }

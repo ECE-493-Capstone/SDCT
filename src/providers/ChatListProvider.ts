@@ -23,7 +23,13 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   getTreeItem(element: IChat): vscode.TreeItem {
     const treeItem = new vscode.TreeItem(element.name);
     if (element.notificationCount > 0) {
-      treeItem.label += ` [${element.notificationCount}]`;
+      treeItem.label += ` ${this.getNotificationCountSymbol(element.notificationCount)}`;
+    }
+    if (element.voiceChatActive) {
+      treeItem.label += ' 🎤';
+    }
+    if (element.codeSessionActive) {
+      treeItem.label += ' 💻';
     }
     treeItem.iconPath = vscode.Uri.parse(element.pictureUri);
     treeItem.description = element.lastMessage;
@@ -52,10 +58,26 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
         lastMessageTime: new Date(now.getTime() + i * 60000 * 60 * 24),
         pictureUri: `https://picsum.photos/seed/${i+1}/200/200`,
         notificationCount: i,
-        isGroup: false
+        isGroup: Math.random() > 0.5,
+        voiceChatActive: Math.random() > 0.5,
+        codeSessionActive: Math.random() > 0.5,
       });
     }
     return data;
+  }
+
+  getNotificationCountSymbol(notificationCount: number): string {
+    const symbols = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+    if (notificationCount > 0) {
+      const notificationCountStr = notificationCount.toString();
+      let result = '';
+      for (let i = 0; i < notificationCountStr.length; i++) {
+        result += symbols[parseInt(notificationCountStr[i])];
+      }
+      return result;
+    } else {
+      return '';
+    }
   }
 
   async searchChatList() {
