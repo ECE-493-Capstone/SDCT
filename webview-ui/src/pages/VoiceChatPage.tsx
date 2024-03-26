@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 
-function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom | undefined}) {
+function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
   const handleMute = () => {
     
   };

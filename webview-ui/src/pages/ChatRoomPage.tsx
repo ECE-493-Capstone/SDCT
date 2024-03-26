@@ -5,27 +5,11 @@ import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 import { IUser } from "../../../src/interfaces/IUser";
 
-const emptyUser: IUser = { name: "", pictureUri: "" };
-
-function ChatRoomPage() {
+function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
-  const [user, setUser] = useState<IUser>(emptyUser);
-  const [friend, setFriend] = useState<IUser>(emptyUser);
-  const [chatRoom, setChatRoom] = useState<IChatRoom>();
-
-  useEffect(() => {
-    window.addEventListener('message', event => {
-      const message = event.data;
-      switch (message.command) {
-        case 'initChatRoom':
-          setUser(message.chatRoom.user);
-          setFriend(message.chatRoom.friends[0]);
-          setChatRoom(message.chatRoom);
-          break;
-      };
-    });
-  }, []);
+  const [user, setUser] = useState<IUser>(chatRoom.user);
+  const [friend, setFriend] = useState<IUser>(chatRoom.friends[0]);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
