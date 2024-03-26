@@ -42,9 +42,10 @@ export class VoiceChatPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    if (VoiceChatPanel.currentPanels.has(chatRoom.friendUsername)) {
+    const chatRoomName = chatRoom.friends[0].name; // or get group ID
+    if (VoiceChatPanel.currentPanels.has(chatRoomName)) {
       // If the webview panel already exists reveal it
-      const panel = VoiceChatPanel.currentPanels.get(chatRoom.friendUsername);
+      const panel = VoiceChatPanel.currentPanels.get(chatRoomName);
       if (!!panel) {
         panel._panel.reveal(ViewColumn.One);
       }
@@ -54,7 +55,7 @@ export class VoiceChatPanel {
         // Panel view type
         "showVoiceChat",
         // Panel title
-        `VC: ${chatRoom.friendUsername}`,
+        `VC: ${chatRoomName}`,
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
@@ -67,7 +68,7 @@ export class VoiceChatPanel {
         }
       );
 
-      VoiceChatPanel.currentPanels.set(chatRoom.friendUsername, new VoiceChatPanel(panel, extensionUri, chatRoom.friendUsername));
+      VoiceChatPanel.currentPanels.set(chatRoomName, new VoiceChatPanel(panel, extensionUri, chatRoomName));
       panel.webview.postMessage({ command: "route", page: EPage.VoiceChat});
     }
   }

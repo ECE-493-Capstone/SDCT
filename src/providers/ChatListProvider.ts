@@ -30,7 +30,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     treeItem.command = {
       command: 'sdct.openChatRoom',
       title: 'chatListItemClicked',
-      arguments: [element.name]
+      arguments: [element]
     };
     return treeItem;
   }
@@ -51,7 +51,8 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
         lastMessage: `Last message ${i}`,
         lastMessageTime: new Date(now.getTime() + i * 60000 * 60 * 24),
         pictureUri: vscode.Uri.parse(`https://picsum.photos/seed/${i+1}/200/200`),
-        notificationCount: i
+        notificationCount: i,
+        isGroup: false
       });
     }
     return data;

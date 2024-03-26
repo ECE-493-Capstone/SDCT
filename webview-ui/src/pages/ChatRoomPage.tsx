@@ -3,21 +3,25 @@ import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
+import { IUser } from "../../../src/interfaces/IUser";
+
+const emptyUser: IUser = { name: "", pictureUri: undefined };
 
 function ChatRoomPage() {
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
-  const [user, setUser] = useState<string>("");
-  const [friend, setFriend] = useState<string>("");
-  const [isGroupChat, setIsGroupChat] = useState<boolean>(false);
+  const [user, setUser] = useState<IUser>(emptyUser);
+  const [friend, setFriend] = useState<IUser>(emptyUser);
+  const [chatRoom, setChatRoom] = useState<IChatRoom>();
 
   useEffect(() => {
     window.addEventListener('message', event => {
       const message = event.data;
       switch (message.command) {
         case 'initChatRoom':
-          setUser(message.chatRoom.username);
-          setFriend(message.chatRoom.friendUsername);
+          setUser(message.chatRoom.user);
+          setFriend(message.chatRoom.friends[0]);
+          setChatRoom(message.chatRoom);
           break;
       };
     });
@@ -36,13 +40,6 @@ function ChatRoomPage() {
   };
 
   const handleOpenMenu = () => {
-    const chatRoom: IChatRoom = {
-      friendUsername: friend,
-      username: user,
-      isGroupChat,
-      joinedVoiceChat: false,
-      joinedCodeSession: false,
-    };
     vscode.postMessage({
       command: 'openChatRoomMenu',
       chatRoom,

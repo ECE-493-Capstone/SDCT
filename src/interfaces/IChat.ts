@@ -6,4 +6,5 @@ export interface IChat {
     lastMessageTime: Date;
     pictureUri: vscode.Uri;
     notificationCount: number;
+    isGroup: boolean;
 }

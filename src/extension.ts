@@ -10,6 +10,7 @@ import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { VoiceChatPanel } from './panels/VoiceChatPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
+import { IChat } from './interfaces/IChat';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -61,10 +62,18 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccount();
 	});
 
-	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (friendUsername: string) => {
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
 		const userAuth = context.globalState.get<IUser>('userAuth');
-		const username = userAuth ? userAuth.name : "";
-		const chatRoom: IChatRoom = {friendUsername, username, isGroupChat: false, joinedVoiceChat: false, joinedCodeSession: false};
+		const emptyUser: IUser = { name: "", pictureUri: vscode.Uri.parse("") };
+		const user = userAuth ? userAuth : emptyUser;
+		// If group, needs to fetch all members name and pictureUri
+		const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };
+		const chatRoom: IChatRoom = {
+			user,
+			friends: [friend],
+			joinedVoiceChat: false, 
+			joinedCodeSession: false
+		};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 

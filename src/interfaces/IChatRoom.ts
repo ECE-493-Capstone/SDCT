@@ -1,7 +1,8 @@
+import { IUser } from "./IUser";
+
 export interface IChatRoom {
-    friendUsername: string;
-    username: string;
-    isGroupChat: boolean;
+    user: IUser;
+    friends: IUser[];
     joinedVoiceChat: boolean;
     joinedCodeSession: boolean;
 }

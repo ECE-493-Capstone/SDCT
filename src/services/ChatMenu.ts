@@ -7,7 +7,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         "Send File", 
         "Send Code Message"
     ];
-    if (chatRoom.isGroupChat) {
+    if (chatRoom.friends.length > 1) {
         options.push("Leave Group");
     }
     if (!chatRoom.joinedVoiceChat) {
@@ -27,7 +27,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         } else if (chosenOption === "Leave Group") {
             return;
         } else if (chosenOption === "Join Voice Chat") {
-            joinVoiceChat(chatRoom)
+            joinVoiceChat(chatRoom);
         } else if (chosenOption === "Join Code Session") {
             return;
         }
