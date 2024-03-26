@@ -5,7 +5,7 @@ import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 import { IUser } from "../../../src/interfaces/IUser";
 
-const emptyUser: IUser = { name: "", pictureUri: undefined };
+const emptyUser: IUser = { name: "", pictureUri: "" };
 
 function ChatRoomPage() {
   const [message, setMessage] = useState("");
@@ -63,9 +63,11 @@ function ChatRoomPage() {
   return (
     <main>
       {messageHistory.map((message, index) => (
-        <div key={index} style={{ textAlign: message.sender === user ? 'left' : 'right' }}>
+        <div key={index} style={{ textAlign: message.sender !== user ? 'left' : 'right' }}>
+          {message.sender !== user ? <img src={message.sender.pictureUri} width="20" /> : null}
           <span>{message.text} </span>
           <span>{getTimeFormatted(message.timestamp)}</span>
+          {message.sender === user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
       ))}
       <VSCodeButton appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
