@@ -29,11 +29,15 @@ export async function chatMenu(chatRoom: IChatRoom) {
         } else if (chosenOption === "Join Voice Chat") {
             joinVoiceChat(chatRoom);
         } else if (chosenOption === "Join Code Session") {
-            return;
+            joinedCodeSession(chatRoom);
         }
     }
 }
 
 const joinVoiceChat = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.openVoiceChat", chatRoom);
+};
+
+const joinedCodeSession = (chatRoom: IChatRoom) => {
+    vscode.commands.executeCommand("sdct.openCodeSession", chatRoom);
 };

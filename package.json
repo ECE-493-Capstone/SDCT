@@ -43,6 +43,10 @@
       {
         "command": "sdct.openVoiceChat",
         "title": "SDCT: Open Voice Chat"
+      },
+      {
+        "command": "sdct.openCodeSession",
+        "title": "SDCT: Open Code Session"
       }
     ],
     "viewsContainers": {

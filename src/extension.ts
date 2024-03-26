@@ -8,6 +8,7 @@ import { IUser } from './interfaces/IUser';
 import { Credentials } from './services/Credentials';
 import { ChatRoomPanel } from './panels/ChatRoomPanel';
 import { VoiceChatPanel } from './panels/VoiceChatPanel';
+import { CodeSessionPanel } from './panels/CodeSessionPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
@@ -85,6 +86,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
 	});
 
+	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
+		CodeSessionPanel.render(context.extensionUri, chatRoom);
+	});
+
 	context.subscriptions.push(
 		loginDisposable,
 		logoutDisposable, 
@@ -92,7 +97,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccountDisposable, 
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
-		openVoiceChatDisposable
+		openVoiceChatDisposable,
+		openCodeSessionDisposable
 	);
 }
 
