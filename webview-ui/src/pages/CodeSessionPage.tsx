@@ -22,6 +22,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
       {chatRoom?.friends.map(friend => (
         <img key={friend.name} src={friend.pictureUri} width="100" />
       ))}
+      <br/>
       <VSCodeButton appearance="secondary" onClick={handleWhiteboard}>Whiteboard</VSCodeButton>
       <VSCodeButton appearance="secondary" onClick={handleReadOnly}>Read-only</VSCodeButton>
       <VSCodeButton appearance="primary" onClick={handleEndSession}>End Session</VSCodeButton>
