@@ -41,7 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		const userInfo = await octokit.users.getAuthenticated();
 		const userAuth: IUser = {
 			name: userInfo.data.login,
-			pictureUri: vscode.Uri.parse(userInfo.data.avatar_url)
+			pictureUri: userInfo.data.avatar_url
 		};
 		context.globalState.update('userAuth', userAuth);
 		chatListProvider.refresh(context);
@@ -64,7 +64,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
 		const userAuth = context.globalState.get<IUser>('userAuth');
-		const emptyUser: IUser = { name: "", pictureUri: vscode.Uri.parse("") };
+		const emptyUser: IUser = { name: "", pictureUri: "" };
 		const user = userAuth ? userAuth : emptyUser;
 		// If group, needs to fetch all members name and pictureUri
 		const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };

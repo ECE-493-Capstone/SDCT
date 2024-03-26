@@ -17,7 +17,7 @@ export class ProfileProvider implements vscode.TreeDataProvider<IUser> {
 
   getTreeItem(element: IUser): vscode.TreeItem {
     const treeItem = new vscode.TreeItem(element.name);
-    treeItem.iconPath = element.pictureUri;
+    treeItem.iconPath = vscode.Uri.parse(element.pictureUri);
     return treeItem;
 }
 
