@@ -114,6 +114,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@octokit/rest": "^20.0.2"
+    "@octokit/rest": "^20.0.2",
+    "socket.io-client": "^4.7.5"
   }
 }
