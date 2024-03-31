@@ -43,7 +43,7 @@ async function createGroup(cprovider: ConnectionProvider) {
 }
 
 async function acceptInvites(cprovider: ConnectionProvider) {
-    const inviteData = cprovider.getInvites();
+    const inviteData = await cprovider.getInvites();
     const acceptInvites = await vscode.window.showQuickPick(inviteData, { canPickMany: true });
     if (!!acceptInvites) {
         // TODO: Accept invites logic
@@ -52,7 +52,7 @@ async function acceptInvites(cprovider: ConnectionProvider) {
 }
 
 async function declineInvites(cprovider: ConnectionProvider) {
-    const inviteData = cprovider.getInvites();
+    const inviteData = await cprovider.getInvites();
     const declineInvites = await vscode.window.showQuickPick(inviteData, { canPickMany: true });
     if (!!declineInvites) {
         // TODO: Decline invites logic

@@ -79,22 +79,26 @@ export class ConnectionProvider {
     async getInvites(): Promise<string[]>{
         const inviteList: string[] = []
         const friend_invites = await this.getRequest(`/list_received_invitations_friends/${this.userID}`);
-        const group_invites = await this.getRequest(`/list_received_invitations_groups/${this.userID}`);
 
         if(friend_invites){
-            const data = await friend_invites.json() as {data: string[]};
-            console.log(data)
-            for(let invite of data.data ){
-                inviteList.push(invite);
+            const data = await friend_invites.json() as {data: {UserId: string}[]};
+            if(data){
+                for(let invite of data.data ){
+                    inviteList.push(invite.UserId);
+                }
             }
+
         }
 
+        const group_invites = await this.getRequest(`/list_received_invitations_groups/${this.userID}`);
         if(group_invites){
             const data = await group_invites.json() as {data: string[]};
-            console.log(data)
-            for(let invite of data.data ){
-                inviteList.push(invite);
+            if(data){
+                for(let invite of data.data ){
+                    inviteList.push(invite);
+                }
             }
+
         }
 
         return inviteList;
