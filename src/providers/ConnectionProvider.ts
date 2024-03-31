@@ -1,5 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { IUser } from '../interfaces/IUser';
+import { IChat } from "../interfaces/IChat";
+import { IApiFriendChatList, IApiGroupChatList } from "../interfaces/IApi"
 
 export class ConnectionProvider {
     private socket: Socket = io();
@@ -46,10 +48,10 @@ export class ConnectionProvider {
     }
 
     async login(user: IUser): Promise<boolean>{
-        const data = await this.postRequest("/login", {Username: user.name});
+        const apiData = await this.postRequest("/login", {Username: user.name});
 
-        if(data){
-            const data_json = await data.json() as {id: string};
+        if(apiData){
+            const data_json = await apiData.json() as {id: string};
             if(data_json.id){
                 this.userID = data_json.id;
                 return true;
@@ -58,18 +60,67 @@ export class ConnectionProvider {
 
         return false;
     }
-    async getChatFriends(){
-        const data = await this.getRequest(`/list_chats_friends/${this.userID}`);
-        
-        console.log(data)
 
-        return false;
+    async getFriendChatList(): Promise<IChat[]> {
+        let data: IChat[] = [];
+        const apiData = await this.getRequest(`/list_chats_friends/${this.userID}`);
+        
+        if(apiData){
+            const data_json = await apiData.json() as {data: IApiFriendChatList[]};
+            console.log(data_json);
+            for(let chat of data_json.data){
+                // Perform UTC Conversion
+                const date =  new Date(0);
+                date.setUTCSeconds(chat.MessageTime);
+
+                data.push({
+                    name: chat.Username,
+                    lastMessage: chat.MessageText,
+                    lastMessageTime: date,
+                    pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
+                    notificationCount: 100, //TODO: ADD
+                    voiceChatActive: false, //TODO: ADD 
+                    codeSessionActive: false,//TODO: ADD
+                    groupId: undefined,
+                  });
+            }
+        }
+
+        return data;
+    }
+
+    async getGroupChatList(): Promise<IChat[]> {
+        let data: IChat[] = [];
+        const apiData = await this.getRequest(`/list_chats_groups/${this.userID}`);
+        
+        if(apiData){
+            const data_json = await apiData.json() as {data: IApiGroupChatList[]};
+            console.log(data_json);
+            for(let chat of data_json.data){
+                // Perform UTC Conversion
+                const date =  new Date(0);
+                date.setUTCSeconds(chat.MessageTime);
+
+                data.push({
+                    name: chat.GroupName,
+                    lastMessage: chat.MessageText,
+                    lastMessageTime: date,
+                    pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
+                    notificationCount: 100, //TODO: ADD
+                    voiceChatActive: false, //TODO: ADD 
+                    codeSessionActive: false,//TODO: ADD
+                    groupId: chat.GroupId.toString(),
+                  });
+            }
+        }
+
+        return data;
     }
 
     async addFriend(friend: string): Promise<boolean>{
-        const data = await this.postRequest(`/add_friend`, {UserId: this.userID, FriendId: friend});
+        const apiData = await this.postRequest(`/add_friend`, {UserId: this.userID, FriendId: friend});
         
-        if(data){
+        if(apiData){
             return true;
         }
 
@@ -102,5 +153,24 @@ export class ConnectionProvider {
         }
 
         return inviteList;
+    }
+
+    async acceptFriendInvite(friend: string): Promise<boolean>{
+        const apiData = await this.postRequest(`/accept_invite_friend`, {FriendId: friend, UserId: this.userID});
+        
+        if(apiData){
+            return true;
+        }
+
+        return false;
+    }
+    async declineFriendInvite(friend: string): Promise<boolean>{
+        const apiData = await this.postRequest(`/decline_invite_friend`, {FriendId: friend, UserId: this.userID});
+        
+        if(apiData){
+            return true;
+        }
+
+        return false;
     }
 }

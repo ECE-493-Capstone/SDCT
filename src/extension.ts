@@ -44,6 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
+
 		const userAuth: IUser = {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url

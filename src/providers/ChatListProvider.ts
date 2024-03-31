@@ -53,9 +53,14 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   async getData(): Promise<IChat[]> {
     let data: IChat[] = [];
     const now = new Date();
-    console.log("Here1")
+
     if(this.cprovider){
-      const data2 = await this.cprovider.getChatFriends();
+      const friendData = await this.cprovider.getFriendChatList();
+      const groupData = await this.cprovider.getGroupChatList();
+
+      data.push(...friendData);
+      data.push(...groupData);
+      console.log(data);
     }
     return data;
   }
@@ -83,7 +88,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     const unfilteredData = await this.getData();
     if (!!this.searchQuery) {
       const filteredData = unfilteredData.filter(chat => chat.name.toLowerCase().includes(this.searchQuery ? this.searchQuery.toLowerCase() : ''));
-      this.data = filteredData
+      this.data = filteredData;
       this._onDidChangeTreeData.fire();
     } else {
       this.data = unfilteredData;
