@@ -12,7 +12,7 @@ import { CodeSessionPanel } from './panels/CodeSessionPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
-import { ConnectionProvider } from './services/ConnectionProvider';
+import { ConnectionProvider } from './providers/ConnectionProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -25,7 +25,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	const credentials = new Credentials();
 	await credentials.initialize(context);
 
-	const chatListProvider = new ChatListProvider(context);
+	const connectionProvider = new ConnectionProvider();
+
+	const chatListProvider = new ChatListProvider(context, connectionProvider);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
@@ -34,7 +36,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeDataProvider: profileProvider
 	});
 
-	const connectionProvider = new ConnectionProvider();
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -47,10 +48,10 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
-		connectionProvider.login(userAuth).then(success => {
+		connectionProvider.login(userAuth).then(async (success) =>{
 			if(success){
 				context.globalState.update('userAuth', userAuth);
-				chatListProvider.refresh(context);
+				await chatListProvider.refresh(context);
 				profileProvider.refresh(context);
 				console.log("Login Success");
 			}else{
@@ -64,9 +65,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
+	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', async () => {
 		context.globalState.update('userAuth', undefined);
-		chatListProvider.refresh(context);
+		await chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	});
 
@@ -75,7 +76,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
-		manageAccount();
+		manageAccount(connectionProvider);
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
@@ -114,7 +115,28 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
+	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", (chatRoom: IChatRoom) => {
+		const userAuth: IUser = {
+			name: "MOCKUSER",
+			pictureUri: "adada"
+		};
+		connectionProvider.login(userAuth).then(async (success) => {
+			if(success){
+				context.globalState.update('userAuth', userAuth);
+				await chatListProvider.refresh(context);
+				profileProvider.refresh(context);
+				console.log("Login Success");
+			}else{
+				console.log("Login Failure");
+			}
+
+		}).catch(err => {
+			console.log("Login Error", err);
+		})
+	});
+
 	context.subscriptions.push(
+		mockLogin,
 		loginDisposable,
 		logoutDisposable, 
 		searchChatDisposable, 

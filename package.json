@@ -15,6 +15,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "sdct.mockLogin",
+        "title": "MOCK USER LOGIN"
+      },
+      {
         "command": "sdct.login",
         "title": "SDCT: Login with GitHub"
       },
