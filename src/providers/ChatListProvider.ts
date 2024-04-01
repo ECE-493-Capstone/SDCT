@@ -44,8 +44,19 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   }
 
   getChildren(): IChat[] | Thenable<IChat[]> {
-    if (this.authenticated) {
+    if (this.authenticated && this.data.length > 0) {
       return this.data.sort((a, b) => b.lastMessageTime.getTime() - a.lastMessageTime.getTime());
+    } else if (this.authenticated) {
+      const emptyChatList: IChat = {
+        name: 'No chats available',
+        pictureUri: '',
+        lastMessage: '',
+        lastMessageTime: new Date(),
+        notificationCount: 0,
+        voiceChatActive: false,
+        codeSessionActive: false
+      };
+      return [emptyChatList];
     }
     return [];
   }
