@@ -4,12 +4,14 @@ import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 
 function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
+  const [isReadOnly, setIsReadOnly] = useState(false);
+
   const handleWhiteboard = () => {
     
   };
 
   const handleReadOnly= () => {
-    
+    setIsReadOnly(!isReadOnly);
   };
 
   const handleEndSession = () => {
@@ -29,7 +31,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
       ))}
       <br/>
       <VSCodeButton appearance="secondary" onClick={handleWhiteboard}>Whiteboard</VSCodeButton>
-      <VSCodeButton appearance="secondary" onClick={handleReadOnly}>Read-only</VSCodeButton>
+      <VSCodeButton appearance={isReadOnly ? "primary" : "secondary"} onClick={handleReadOnly}>{isReadOnly ? "Read-only" : "Edit-mode"}</VSCodeButton>
       <VSCodeButton appearance="primary" onClick={handleEndSession}>End Session</VSCodeButton>
     </main>
   );
