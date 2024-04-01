@@ -8,7 +8,7 @@ export class ConnectionProvider {
     private activeSession: boolean = false;
     private sessionID: string = "";
     private userID: string = "";
-    private DatabaseURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]"
+    private DatabaseURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
     private DatabasePort = 8000;
 
     private async postRequest(path: string, data: object): Promise<Response | undefined> {
