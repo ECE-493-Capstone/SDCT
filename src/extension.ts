@@ -105,7 +105,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			groupId: chat.groupId
 		};
 		const socketChatRoom = chat.groupId ? chat.groupId : chat.friendId;
-		console.log(socketChatRoom)
 		backendSocket.getSocket().emit("join chat", socketChatRoom);
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
@@ -122,8 +121,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (message: IMessage, roomId: string) => {
-		backendSocket.getSocket().emit("chat message", {roomId, message});
+	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (roomId: string, message: IMessage) => {
+		backendSocket.getSocket().emit("send chat message", roomId, message);
 	});
 
 	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", () => {

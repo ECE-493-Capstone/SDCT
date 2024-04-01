@@ -1,6 +1,7 @@
 export interface IApiFriendChatList{
     Username: string,
     FriendId: number,
+    rowid: number;
     ContactTime: number,
     MessageId: number,
     SendId: number,

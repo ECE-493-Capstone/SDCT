@@ -83,7 +83,7 @@ export class BackendAPI {
                     notificationCount: 100, //TODO: ADD
                     voiceChatActive: false, //TODO: ADD 
                     codeSessionActive: false,//TODO: ADD
-                    friendId: chat.FriendId.toString(),
+                    friendId: chat.rowid.toString(),
                     groupId: undefined,
                   });
             }
