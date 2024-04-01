@@ -5,6 +5,7 @@ import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 
 function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [isReadOnly, setIsReadOnly] = useState(false);
+  const [isHost, setIsHost] = useState(false); // fetch value from server
 
   const handleWhiteboard = () => {
     
@@ -31,7 +32,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
       ))}
       <br/>
       <VSCodeButton appearance="secondary" onClick={handleWhiteboard}>Whiteboard</VSCodeButton>
-      <VSCodeButton appearance={isReadOnly ? "primary" : "secondary"} onClick={handleReadOnly}>{isReadOnly ? "Read-only" : "Edit-mode"}</VSCodeButton>
+      {isHost && <VSCodeButton appearance={isReadOnly ? "primary" : "secondary"} onClick={handleReadOnly}>{isReadOnly ? "Read-only" : "Edit-mode"}</VSCodeButton>}
       <VSCodeButton appearance="primary" onClick={handleEndSession}>End Session</VSCodeButton>
     </main>
   );
