@@ -23,7 +23,7 @@ function App() {
   };
 
   useEffect(() => {
-    window.addEventListener('message', event => {
+    function handleMessage(event: any) {
       const message = event.data;
       switch (message.command) {
         case 'route':
@@ -33,10 +33,18 @@ function App() {
           setChatRoom(message.chatRoom);
           break;
         case 'new message':
-          handleNewMessage(message.message);
+          const newMessage = {
+            text: message.message.text,
+            timestamp: new Date(message.message.timestamp),
+            sender: message.message.sender,
+          };
+          handleNewMessage(newMessage);
           break;
       };
-    });
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [messageHistory]);
 
   return (

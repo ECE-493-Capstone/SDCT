@@ -163,6 +163,9 @@ export class ChatRoomPanel {
           case "openChatRoomMenu":
             const chatRoom: IChatRoom = message.chatRoom;
             commands.executeCommand('sdct.openChatRoomMenu', chatRoom);
+          case "sendChatMessage":
+            const newMessage: IMessage = message.message;
+            commands.executeCommand('sdct.sendChatMessage', message.roomid, newMessage);
         }
       },
       undefined,

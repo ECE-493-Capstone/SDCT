@@ -70,7 +70,6 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
 
       data.push(...friendData);
       data.push(...groupData);
-      console.log(data);
     }
     return data;
   }

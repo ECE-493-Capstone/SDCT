@@ -7,10 +7,10 @@ import { IMessage } from "../../../src/interfaces/IMessage";
 function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], handleNewMessage: (message: IMessage) => void}) {
   const [message, setMessage] = useState("");
 
-  const handleOpenMenu = (chatRoom: IChatRoom) => {
+  const handleOpenMenu = () => {
     vscode.postMessage({
       command: 'openChatRoomMenu',
-      chatRoom,
+      chatRoom: props.chatRoom,
     });
   };
 
@@ -47,7 +47,7 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
         </div>
       ))}
       {}
-      <VSCodeButton appearance="secondary" onClick={() => handleOpenMenu(props.chatRoom)}>+</VSCodeButton>
+      <VSCodeButton appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
       <form onSubmit={handleSendMessage}>
         <VSCodeTextField value={message} onInput={e => {
           const target = e.target as HTMLInputElement;

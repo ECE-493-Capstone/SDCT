@@ -20,7 +20,7 @@ export class BackendSocket{
             }
         });
 
-        this.socket.on("chat message", ({chatRoomId, message}) => {
+        this.socket.on("get chat message", (chatRoomId, message) => {
             ChatRoomPanel.sendChatMessage(chatRoomId, message);
         });
     }
