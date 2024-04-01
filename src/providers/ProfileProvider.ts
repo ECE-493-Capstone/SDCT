@@ -19,7 +19,7 @@ export class ProfileProvider implements vscode.TreeDataProvider<IUser> {
     const treeItem = new vscode.TreeItem(element.name);
     treeItem.iconPath = vscode.Uri.parse(element.pictureUri);
     return treeItem;
-}
+  }
 
   getChildren(): IUser[] | Thenable<IUser[]> {
     let data = [];

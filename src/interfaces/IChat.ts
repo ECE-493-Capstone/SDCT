@@ -6,5 +6,6 @@ export interface IChat {
     notificationCount: number;
     voiceChatActive: boolean;
     codeSessionActive: boolean;
+    friendId?: string;
     groupId?: string;
 }

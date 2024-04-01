@@ -1,32 +1,36 @@
 import * as vscode from 'vscode';
+import { BackendAPI } from '../backend/BackendAPI';
 
-export async function manageAccount() {
+export async function manageAccount(cprovider: BackendAPI) {
     const options = ["Add friend", "Create group", "Accept invites", "Decline invites", "Log out"];
     const chosenOption = await vscode.window.showQuickPick(options);
     if (!!chosenOption) {
         if (chosenOption === "Add friend") {
-            await addFriend();
+            await addFriend(cprovider);
         } else if (chosenOption === "Create group") {
-            await createGroup();
+            await createGroup(cprovider);
         } else if (chosenOption === "Accept invites") {
-            await acceptInvites();
+            await acceptInvites(cprovider);
         } else if (chosenOption === "Decline invites") {
-            await declineInvites();
+            await declineInvites(cprovider);
         } else if (chosenOption === "Log out") {
             vscode.commands.executeCommand('sdct.logout');
         }
     }
 }
 
-async function addFriend() {
+async function addFriend(cprovider: BackendAPI) {
     const username = await vscode.window.showInputBox({ prompt: "Enter username" });
     if (!!username) {
-        // TODO: Add friend logic
-        vscode.window.showInformationMessage(`Added ${username} as a friend`);
+        if(await cprovider.addFriend(username)){
+            vscode.window.showInformationMessage(`Added ${username} as a friend`);
+        } else{
+            vscode.window.showErrorMessage(`Failed to add ${username} as a friend`);
+        }
     }
 }
 
-async function createGroup() {
+async function createGroup(cprovider: BackendAPI) {
     const groupName = await vscode.window.showInputBox({ prompt: "Enter group name" });
     if (!!groupName) {
         const mockData = ["user01", "user02", "user03", "user04", "user05"];
@@ -38,20 +42,24 @@ async function createGroup() {
     }
 }
 
-async function acceptInvites() {
-    const mockData = ["user01", "user02", "user03", "group01", "group02"];
-    const acceptInvites = await vscode.window.showQuickPick(mockData, { canPickMany: true });
+async function acceptInvites(cprovider: BackendAPI) {
+    const inviteData = await cprovider.getInvites();
+    const acceptInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
     if (!!acceptInvites) {
-        // TODO: Accept invites logic
+        for (let friend of acceptInvites){
+            await cprovider.acceptFriendInvite(friend);
+        }
         vscode.window.showInformationMessage(`Accepted invites`);
     }
 }
 
-async function declineInvites() {
-    const mockData = ["user01", "user02", "user03", "group01", "group02"];
-    const declineInvites = await vscode.window.showQuickPick(mockData, { canPickMany: true });
+async function declineInvites(cprovider: BackendAPI) {
+    const inviteData = await cprovider.getInvites();
+    const declineInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
     if (!!declineInvites) {
-        // TODO: Decline invites logic
+        for (let friend of declineInvites){
+            await cprovider.declineFriendInvite(friend);
+        }
         vscode.window.showInformationMessage(`Declined invites`);
     }
 }

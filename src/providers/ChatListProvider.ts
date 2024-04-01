@@ -1,23 +1,25 @@
 import * as vscode from 'vscode';
 import { IUser } from '../interfaces/IUser';
-import { get } from 'http';
 import { IChat } from '../interfaces/IChat';
+import { BackendAPI } from '../backend/BackendAPI'
 
 export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
-  private data: IChat[];
+  private data: IChat[] = [];
   private authenticated: boolean;
+  private cprovider: BackendAPI | undefined;
   private searchQuery: string | undefined;
   private _onDidChangeTreeData: vscode.EventEmitter<IChat | undefined | null | void> = new vscode.EventEmitter<IChat | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
 
-  refresh(context: vscode.ExtensionContext): void {
+  async refresh(context: vscode.ExtensionContext): Promise<void> {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
+    this.data = await this.getData();
     this._onDidChangeTreeData.fire();
   }
 
-  constructor(context: vscode.ExtensionContext) {
+  constructor(context: vscode.ExtensionContext, cprovider: BackendAPI) {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
-    this.data = this.getMockData();
+    this.cprovider = cprovider;
   }
 
   getTreeItem(element: IChat): vscode.TreeItem {
@@ -43,26 +45,21 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
 
   getChildren(): IChat[] | Thenable<IChat[]> {
     if (this.authenticated) {
-        return this.data.sort((a, b) => b.lastMessageTime.getTime() - a.lastMessageTime.getTime());
+      return this.data.sort((a, b) => b.lastMessageTime.getTime() - a.lastMessageTime.getTime());
     }
     return [];
   }
 
-  getMockData(): IChat[] {
+  async getData(): Promise<IChat[]> {
     let data: IChat[] = [];
-    const now = new Date();
-    for (let i = 0; i < 5; i++) {
-      const groupId = Math.random() > 0.75 ? `Group ${i}` : undefined;
-      data.push({
-        name: groupId ? groupId : `Friend ${i}`,
-        lastMessage: `Last message ${i}`,
-        lastMessageTime: new Date(now.getTime() + i * 60000 * 60 * 24),
-        pictureUri: `https://picsum.photos/seed/${i+1}/200/200`,
-        notificationCount: i,
-        voiceChatActive: Math.random() > 0.75,
-        codeSessionActive: Math.random() > 0.75,
-        groupId,
-      });
+
+    if(this.cprovider){
+      const friendData = await this.cprovider.getFriendChatList();
+      const groupData = await this.cprovider.getGroupChatList();
+
+      data.push(...friendData);
+      data.push(...groupData);
+      console.log(data);
     }
     return data;
   }
@@ -86,12 +83,14 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
       prompt: 'Search for chat',
       placeHolder: this.searchQuery
     });
+
+    const unfilteredData = await this.getData();
     if (!!this.searchQuery) {
-      const filteredData = this.getMockData().filter(chat => chat.name.toLowerCase().includes(this.searchQuery ? this.searchQuery.toLowerCase() : ''));
+      const filteredData = unfilteredData.filter(chat => chat.name.toLowerCase().includes(this.searchQuery ? this.searchQuery.toLowerCase() : ''));
       this.data = filteredData;
       this._onDidChangeTreeData.fire();
     } else {
-      this.data = this.getMockData();
+      this.data = unfilteredData;
       this._onDidChangeTreeData.fire();
     }
   }

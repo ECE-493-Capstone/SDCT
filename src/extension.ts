@@ -12,6 +12,9 @@ import { CodeSessionPanel } from './panels/CodeSessionPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
+import { BackendAPI } from './backend/BackendAPI';
+import { BackendSocket } from './backend/BackendSocket'
+import { IMessage } from './interfaces/IMessage';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -23,8 +26,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const credentials = new Credentials();
 	await credentials.initialize(context);
+	
+	const backendAPI = new BackendAPI("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 8000);
+	const backendSocket = new BackendSocket("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 3000);
 
-	const chatListProvider = new ChatListProvider(context);
+	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
@@ -33,6 +39,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeDataProvider: profileProvider
 	});
 
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -40,18 +47,30 @@ export async function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		const octokit = await credentials.setOctokit();
 		const userInfo = await octokit.users.getAuthenticated();
+
 		const userAuth: IUser = {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
-		context.globalState.update('userAuth', userAuth);
-		chatListProvider.refresh(context);
-		profileProvider.refresh(context);
+		backendSocket.startSocketIO(userInfo.data.login);
+		backendAPI.login(userAuth).then(async (success) =>{
+			if(success){
+				context.globalState.update('userAuth', userAuth);
+				await chatListProvider.refresh(context);
+				profileProvider.refresh(context);
+				console.log("Login Success");
+			}else{
+				console.log("Login Failure");
+			}
+
+		}).catch(err => {
+			console.log("Login Error", err);
+		})
 	});
 
-	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', () => {
+	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', async () => {
 		context.globalState.update('userAuth', undefined);
-		chatListProvider.refresh(context);
+		await chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	});
 
@@ -60,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
-		manageAccount();
+		manageAccount(backendAPI);
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
@@ -82,8 +101,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			friends,
 			joinedVoiceChat: false, 
 			joinedCodeSession: false,
+			friendId: chat.friendId,
 			groupId: chat.groupId
 		};
+		const socketChatRoom = chat.groupId ? chat.groupId : chat.friendId;
+		console.log(socketChatRoom)
+		backendSocket.getSocket().emit("join chat", socketChatRoom);
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
@@ -99,7 +122,33 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
+	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (message: IMessage, roomId: string) => {
+		backendSocket.getSocket().emit("chat message", {roomId, message});
+	});
+
+	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", () => {
+		const userAuth: IUser = {
+			name: "MOCKUSER",
+			pictureUri: "adada"
+		};
+		backendSocket.startSocketIO("MOCKUSER");
+		backendAPI.login(userAuth).then(async (success) => {
+			if(success){
+				context.globalState.update('userAuth', userAuth);
+				await chatListProvider.refresh(context);
+				profileProvider.refresh(context);
+				console.log("Login Success");
+			}else{
+				console.log("Login Failure");
+			}
+
+		}).catch(err => {
+			console.log("Login Error", err);
+		})
+	});
+
 	context.subscriptions.push(
+		mockLogin,
 		loginDisposable,
 		logoutDisposable, 
 		searchChatDisposable, 
@@ -107,7 +156,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
-		openCodeSessionDisposable
+		openCodeSessionDisposable,
+		sendChatMessage
 	);
 }
 
