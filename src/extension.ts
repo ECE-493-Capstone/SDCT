@@ -104,6 +104,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
+		const chatRooms = [...chatListProvider.getData()];
+		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+		const chatRoomIndex = chatRooms.findIndex(chat => {
+			const chatId = chat.groupId ? chat.groupId : chat.name;
+			return chatId === chatRoomId;
+		});
+		chatRooms[chatRoomIndex].codeSessionActive = true;
+		chatListProvider.setData(chatRooms);
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
