@@ -12,7 +12,9 @@ import { CodeSessionPanel } from './panels/CodeSessionPanel';
 import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
-import { ConnectionProvider } from './providers/ConnectionProvider';
+import { BackendAPI } from './backend/BackendAPI';
+import { BackendSocket } from './backend/BackendSocket'
+import { IMessage } from './interfaces/IMessage';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -24,10 +26,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const credentials = new Credentials();
 	await credentials.initialize(context);
+	
+	const backendAPI = new BackendAPI("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 8000);
+	const backendSocket = new BackendSocket("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 3000);
 
-	const connectionProvider = new ConnectionProvider();
-
-	const chatListProvider = new ChatListProvider(context, connectionProvider);
+	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
@@ -49,7 +52,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
-		connectionProvider.login(userAuth).then(async (success) =>{
+		backendSocket.startSocketIO(userInfo.data.login);
+		backendAPI.login(userAuth).then(async (success) =>{
 			if(success){
 				context.globalState.update('userAuth', userAuth);
 				await chatListProvider.refresh(context);
@@ -62,8 +66,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		}).catch(err => {
 			console.log("Login Error", err);
 		})
-
-
 	});
 
 	const logoutDisposable = vscode.commands.registerCommand('sdct.logout', async () => {
@@ -77,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
-		manageAccount(connectionProvider);
+		manageAccount(backendAPI);
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
@@ -99,8 +101,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			friends,
 			joinedVoiceChat: false, 
 			joinedCodeSession: false,
+			friendId: chat.friendId,
 			groupId: chat.groupId
 		};
+		const socketChatRoom = chat.groupId ? chat.groupId : chat.friendId;
+		console.log(socketChatRoom)
+		backendSocket.getSocket().emit("join chat", socketChatRoom);
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
@@ -116,12 +122,17 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", (chatRoom: IChatRoom) => {
+	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (message: IMessage, roomId: string) => {
+		backendSocket.getSocket().emit("chat message", {roomId, message});
+	});
+
+	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", () => {
 		const userAuth: IUser = {
 			name: "MOCKUSER",
 			pictureUri: "adada"
 		};
-		connectionProvider.login(userAuth).then(async (success) => {
+		backendSocket.startSocketIO("MOCKUSER");
+		backendAPI.login(userAuth).then(async (success) => {
 			if(success){
 				context.globalState.update('userAuth', userAuth);
 				await chatListProvider.refresh(context);
@@ -145,7 +156,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
-		openCodeSessionDisposable
+		openCodeSessionDisposable,
+		sendChatMessage
 	);
 }
 

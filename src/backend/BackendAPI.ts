@@ -1,20 +1,22 @@
 import { io, Socket } from "socket.io-client";
 import { IUser } from '../interfaces/IUser';
 import { IChat } from "../interfaces/IChat";
-import { IApiFriendChatList, IApiGroupChatList } from "../interfaces/IApi"
+import { IApiFriendChatList, IApiGroupChatList } from "../interfaces/IBackendApi"
 
-export class ConnectionProvider {
-    private socket: Socket = io();
-    private activeSession: boolean = false;
-    private sessionID: string = "";
+export class BackendAPI {
     private userID: string = "";
-    private DatabaseURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
-    private DatabasePort = 8000;
+    private apiURL = "";
+    private apiPort = 3000;
+
+    constructor(apiUrl: string, apiPort: number){
+        this.apiURL = apiUrl;
+        this.apiPort = apiPort;
+    }
 
     private async postRequest(path: string, data: object): Promise<Response | undefined> {
         console.log("Post", path)
         try {
-            const response = await fetch(`${this.DatabaseURL}:${this.DatabasePort}${path}`, {
+            const response = await fetch(`${this.apiURL}:${this.apiPort}${path}`, {
                 method: 'post',
                 body: JSON.stringify(data),
                 headers: {'Content-Type': 'application/json'}
@@ -34,7 +36,7 @@ export class ConnectionProvider {
     private async getRequest(path: string): Promise<Response | undefined> {
         console.log("Get", path)
         try {
-            const response = await fetch( `${this.DatabaseURL}:${this.DatabasePort}${path}`)
+            const response = await fetch( `${this.apiURL}:${this.apiPort}${path}`)
             
             if(!response.ok){
                 throw new Error(await response.text());
@@ -81,6 +83,7 @@ export class ConnectionProvider {
                     notificationCount: 100, //TODO: ADD
                     voiceChatActive: false, //TODO: ADD 
                     codeSessionActive: false,//TODO: ADD
+                    friendId: chat.FriendId.toString(),
                     groupId: undefined,
                   });
             }
@@ -109,6 +112,7 @@ export class ConnectionProvider {
                     notificationCount: 100, //TODO: ADD
                     voiceChatActive: false, //TODO: ADD 
                     codeSessionActive: false,//TODO: ADD
+                    friendId: undefined,
                     groupId: chat.GroupId.toString(),
                   });
             }

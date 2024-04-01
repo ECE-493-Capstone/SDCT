@@ -2,7 +2,9 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } 
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
+import { IUser } from "../interfaces/IUser";
 import { EPage } from "../enums/EPage";
+import { IMessage } from "../interfaces/IMessage";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
@@ -21,6 +23,10 @@ export class ChatRoomPanel {
     } else {
       return chatRoom.friends[0].name;
     }
+  }
+
+  public static sendChatMessage(chatRoomId: string, message: IMessage) {
+    ChatRoomPanel.currentPanels.get(chatRoomId)?._panel.webview.postMessage({ command: "new message", message: message});
   }
 
   /**
@@ -51,7 +57,10 @@ export class ChatRoomPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friendId;
+    if(chatRoomId === undefined){
+      return;
+    }
     if (ChatRoomPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
       const panel = ChatRoomPanel.currentPanels.get(chatRoomId);

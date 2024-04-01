@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { IUser } from '../interfaces/IUser';
 import { IChat } from '../interfaces/IChat';
-import { ConnectionProvider } from './ConnectionProvider'
+import { BackendAPI } from '../backend/BackendAPI'
 
 export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   private data: IChat[] = [];
   private authenticated: boolean;
-  private cprovider: ConnectionProvider | undefined;
+  private cprovider: BackendAPI | undefined;
   private searchQuery: string | undefined;
   private _onDidChangeTreeData: vscode.EventEmitter<IChat | undefined | null | void> = new vscode.EventEmitter<IChat | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -17,7 +17,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     this._onDidChangeTreeData.fire();
   }
 
-  constructor(context: vscode.ExtensionContext, cprovider: ConnectionProvider) {
+  constructor(context: vscode.ExtensionContext, cprovider: BackendAPI) {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this.cprovider = cprovider;
   }

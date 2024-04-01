@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { ConnectionProvider } from '../providers/ConnectionProvider';
+import { BackendAPI } from '../backend/BackendAPI';
 
-export async function manageAccount(cprovider: ConnectionProvider) {
+export async function manageAccount(cprovider: BackendAPI) {
     const options = ["Add friend", "Create group", "Accept invites", "Decline invites", "Log out"];
     const chosenOption = await vscode.window.showQuickPick(options);
     if (!!chosenOption) {
@@ -19,7 +19,7 @@ export async function manageAccount(cprovider: ConnectionProvider) {
     }
 }
 
-async function addFriend(cprovider: ConnectionProvider) {
+async function addFriend(cprovider: BackendAPI) {
     const username = await vscode.window.showInputBox({ prompt: "Enter username" });
     if (!!username) {
         if(await cprovider.addFriend(username)){
@@ -30,7 +30,7 @@ async function addFriend(cprovider: ConnectionProvider) {
     }
 }
 
-async function createGroup(cprovider: ConnectionProvider) {
+async function createGroup(cprovider: BackendAPI) {
     const groupName = await vscode.window.showInputBox({ prompt: "Enter group name" });
     if (!!groupName) {
         const mockData = ["user01", "user02", "user03", "user04", "user05"];
@@ -42,7 +42,7 @@ async function createGroup(cprovider: ConnectionProvider) {
     }
 }
 
-async function acceptInvites(cprovider: ConnectionProvider) {
+async function acceptInvites(cprovider: BackendAPI) {
     const inviteData = await cprovider.getInvites();
     const acceptInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
     if (!!acceptInvites) {
@@ -53,7 +53,7 @@ async function acceptInvites(cprovider: ConnectionProvider) {
     }
 }
 
-async function declineInvites(cprovider: ConnectionProvider) {
+async function declineInvites(cprovider: BackendAPI) {
     const inviteData = await cprovider.getInvites();
     const declineInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
     if (!!declineInvites) {
