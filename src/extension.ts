@@ -109,6 +109,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel?.webview.postMessage({command: "file", file});
 	});
 
+	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, language: string) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "code", language});
+	});
+
 	context.subscriptions.push(
 		loginDisposable,
 		logoutDisposable, 

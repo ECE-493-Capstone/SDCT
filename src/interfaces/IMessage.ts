@@ -6,4 +6,5 @@ export interface IMessage {
     timestamp: Date;
     sender: IUser;
     type: EMessageType;
+    language?: string;
 }

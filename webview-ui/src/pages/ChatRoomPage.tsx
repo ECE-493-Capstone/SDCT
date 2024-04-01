@@ -1,12 +1,14 @@
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
 import { useState, useEffect, useRef } from "react";
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 import { EMessageType } from "../../../src/enums/EMessageType";
 
 function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
-  const [message, setMessage] = useState("");
+  const [message, _setMessage] = useState("");
   const [messageHistory, _setMessageHistory] = useState<IMessage[]>([]);
   const messageHistoryRef = useRef(messageHistory);
   const setMessageHistory = (data: IMessage[]) => {
@@ -14,6 +16,11 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     _setMessageHistory(data);
   };
   const chatRoomRef = useRef(chatRoom);
+  const messageRef = useRef(message);
+  const setMessage = (data: string) => {
+    messageRef.current = data;
+    _setMessage(data);
+  };
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -45,6 +52,17 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
             });
           });
           setMessageHistory(newMessageHistory);
+        case 'code':
+          const language = message.language;
+          newMessageHistory.push({
+            content: messageRef.current,
+            timestamp: new Date(),
+            sender: chatRoomRef.current.user,
+            type: EMessageType.Code,
+            language
+          });
+          setMessageHistory(newMessageHistory);
+          setMessage("");
       };
     });
   }, []);
@@ -100,6 +118,10 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
               Your browser does not support the video tag.
             </video> : null}
           {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
+          {message.type === EMessageType.Code ?
+            <SyntaxHighlighter language={message.language} style={docco}>
+              {message.content}
+            </SyntaxHighlighter> : null}
           <span>{getTimeFormatted(message.timestamp)}</span>
           {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
