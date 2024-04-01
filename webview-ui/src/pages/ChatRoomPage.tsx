@@ -126,9 +126,9 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
       ))}
-      <VSCodeButton appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
-      <form onSubmit={handleSendMessage}>
-        <VSCodeTextField value={message} onInput={e => {
+      <VSCodeButton className="menuButton" appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
+      <form className="chatForm" onSubmit={handleSendMessage}>
+        <VSCodeTextField className="chatInput" value={message} onInput={e => {
           const target = e.target as HTMLInputElement;
           setMessage(target.value);
         }}/>
