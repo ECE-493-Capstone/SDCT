@@ -80,7 +80,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
         <div key={index} style={{ textAlign: message.sender !== chatRoom.user ? 'left' : 'right' }}>
           {message.sender !== chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
           {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
-          {message.type === EMessageType.Media ? <span>{message.content} </span> : null}
+          {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
           <span>{getTimeFormatted(message.timestamp)}</span>
           {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
