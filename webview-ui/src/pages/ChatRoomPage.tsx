@@ -13,6 +13,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     messageHistoryRef.current = data;
     _setMessageHistory(data);
   };
+  const chatRoomRef = useRef(chatRoom);
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -26,7 +27,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
             newMessageHistory.push({
               content: media.path, // change with URL of media in server
               timestamp: new Date(),
-              sender: chatRoom.user,
+              sender: chatRoomRef.current.user,
               type: EMessageType.Media,
             });
           });
@@ -34,6 +35,10 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
       };
     });
   }, []);
+
+  useEffect(() => {
+    chatRoomRef.current = chatRoom;
+  }, [chatRoom]);
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
