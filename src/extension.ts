@@ -92,6 +92,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const openVoiceChatDisposable = vscode.commands.registerCommand("sdct.openVoiceChat", (chatRoom: IChatRoom) => {
+		const chatRooms = [...chatListProvider.getData()];
+		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+		const chatRoomIndex = chatRooms.findIndex(chat => {
+			const chatId = chat.groupId ? chat.groupId : chat.name;
+			return chatId === chatRoomId;
+		});
+		chatRooms[chatRoomIndex].voiceChatActive = true;
+		chatListProvider.setData(chatRooms);
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
 	});
 
@@ -124,7 +132,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		openVoiceChatDisposable,
 		openCodeSessionDisposable,
 		sendMediaDisposable,
-		sendFileDisposable
+		sendFileDisposable,
+		sendCodeMessageDisposable
 	);
 }
 

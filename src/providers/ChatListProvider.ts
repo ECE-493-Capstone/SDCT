@@ -20,6 +20,15 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     this.data = this.getMockData();
   }
 
+  public getData(): IChat[] {
+    return this.data;
+  }
+
+  public setData(data: IChat[]): void {
+    this.data = data;
+    this._onDidChangeTreeData.fire();
+  }
+
   getTreeItem(element: IChat): vscode.TreeItem {
     const treeItem = new vscode.TreeItem(element.name);
     if (element.notificationCount > 0) {
