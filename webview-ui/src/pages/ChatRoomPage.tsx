@@ -3,18 +3,41 @@ import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
+import { EMessageType } from "../../../src/enums/EMessageType";
 
 function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [message, setMessage] = useState("");
   const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
 
+  useEffect(() => {
+    window.addEventListener('message', event => {
+      const message = event.data;
+      switch (message.command) {
+        case 'media':
+          const medias = message.media;
+          // send media
+          const newMessageHistory = [...messageHistory];
+          medias.forEach((media: { path: string; }) => {
+            newMessageHistory.push({
+              content: media.path, // change with URL of media in server
+              timestamp: new Date(),
+              sender: chatRoom.user,
+              type: EMessageType.Media,
+            });
+          });
+          setMessageHistory(newMessageHistory);
+      };
+    });
+  }, []);
+
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     let newMessageHistory = [...messageHistory];
     newMessageHistory.push({
-      text: message,
+      content: message,
       timestamp: new Date(),
       sender: mockSenderGenerator(),
+      type: EMessageType.Text,
     });
     setMessageHistory(newMessageHistory);
     setMessage("");
@@ -46,7 +69,8 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
       {messageHistory.map((message, index) => (
         <div key={index} style={{ textAlign: message.sender !== chatRoom.user ? 'left' : 'right' }}>
           {message.sender !== chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-          <span>{message.text} </span>
+          {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
+          {message.type === EMessageType.Media ? <span>{message.content} </span> : null}
           <span>{getTimeFormatted(message.timestamp)}</span>
           {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>

@@ -99,6 +99,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
+	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, media: vscode.Uri[]) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "media", media});
+	});
+
 	context.subscriptions.push(
 		loginDisposable,
 		logoutDisposable, 

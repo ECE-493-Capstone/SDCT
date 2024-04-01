@@ -14,6 +14,18 @@ export class ChatRoomPanel {
     return this._panel;
   }
 
+  public static getPanel(chatRoomId: string): WebviewPanel | undefined {
+    const panel = ChatRoomPanel.currentPanels.get(chatRoomId);
+    if (!!panel) {
+      return panel._panel;
+    }
+    return undefined;
+  }
+
+  public static getChatRoomId(chatRoom: IChatRoom): string {
+    return chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+  }
+
   public static getChatRoomName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
       const groupName = chatRoom.groupId; // FETCH ACTUAL GROUP NAME
@@ -51,7 +63,7 @@ export class ChatRoomPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    const chatRoomId = this.getChatRoomId(chatRoom);
     if (ChatRoomPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
       const panel = ChatRoomPanel.currentPanels.get(chatRoomId);

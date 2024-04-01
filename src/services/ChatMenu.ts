@@ -19,7 +19,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
     const chosenOption = await vscode.window.showQuickPick(options);
     if (!!chosenOption) {
         if (chosenOption === "Send Media") {
-            return;
+            await sendMedia(chatRoom);
         } else if (chosenOption === "Send File") {
             return;
         } else if (chosenOption === "Send Code Message") {
@@ -33,6 +33,21 @@ export async function chatMenu(chatRoom: IChatRoom) {
         }
     }
 }
+
+const sendMedia = async (chatRoom: IChatRoom) => {
+    const media = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: true,
+        filters: {
+            'Media': ['png', 'jpg', 'jpeg', 'mp4', 'gif'],
+            'All Files': ['*']
+        }
+    });
+    if (!!media) {
+        vscode.commands.executeCommand("sdct.sendMedia", chatRoom, media);
+    }
+};
 
 const joinVoiceChat = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.openVoiceChat", chatRoom);

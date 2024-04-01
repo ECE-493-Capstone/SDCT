@@ -47,6 +47,10 @@
       {
         "command": "sdct.openCodeSession",
         "title": "SDCT: Open Code Session"
+      },
+      {
+        "command": "sdct.sendMedia",
+        "title": "SDCT: Send Media"
       }
     ],
     "viewsContainers": {
