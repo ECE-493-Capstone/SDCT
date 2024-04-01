@@ -1,5 +1,5 @@
 import { VSCodeButton, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
@@ -7,7 +7,12 @@ import { EMessageType } from "../../../src/enums/EMessageType";
 
 function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [message, setMessage] = useState("");
-  const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
+  const [messageHistory, _setMessageHistory] = useState<IMessage[]>([]);
+  const messageHistoryRef = useRef(messageHistory);
+  const setMessageHistory = (data: IMessage[]) => {
+    messageHistoryRef.current = data;
+    _setMessageHistory(data);
+  };
 
   useEffect(() => {
     window.addEventListener('message', event => {
@@ -16,7 +21,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
         case 'media':
           const medias = message.media;
           // send media
-          const newMessageHistory = [...messageHistory];
+          const newMessageHistory = [...messageHistoryRef.current];
           medias.forEach((media: { path: string; }) => {
             newMessageHistory.push({
               content: media.path, // change with URL of media in server
