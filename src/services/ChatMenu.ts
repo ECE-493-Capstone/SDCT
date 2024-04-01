@@ -9,6 +9,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
     ];
     if (chatRoom.friends.length > 1) {
         options.push("Leave Group");
+        options.push("See Group Members");
     }
     if (!chatRoom.joinedVoiceChat) {
         options.push("Join Voice Chat");
@@ -30,6 +31,8 @@ export async function chatMenu(chatRoom: IChatRoom) {
             joinVoiceChat(chatRoom);
         } else if (chosenOption === "Join Code Session") {
             joinedCodeSession(chatRoom);
+        } else if (chosenOption === "See Group Members") {
+            await showGroupMembers(chatRoom);
         }
     }
 }
@@ -75,4 +78,8 @@ const joinVoiceChat = (chatRoom: IChatRoom) => {
 
 const joinedCodeSession = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.openCodeSession", chatRoom);
+};
+
+const showGroupMembers = async (chatRoom: IChatRoom) => {
+    vscode.window.showQuickPick(chatRoom.friends.map(friend => friend.name));
 };
