@@ -18,11 +18,11 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   useEffect(() => {
     window.addEventListener('message', event => {
       const message = event.data;
+      const newMessageHistory = [...messageHistoryRef.current];
       switch (message.command) {
         case 'media':
           const medias = message.media;
           // send media
-          const newMessageHistory = [...messageHistoryRef.current];
           medias.forEach((media: { path: string; }) => {
             const isVideo = media.path.endsWith('.mp4');
             newMessageHistory.push({
@@ -30,6 +30,18 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
               timestamp: new Date(),
               sender: chatRoomRef.current.user,
               type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
+            });
+          });
+          setMessageHistory(newMessageHistory);
+        case 'file':
+          const files = message.file;
+          // send file
+          files.forEach((file: { path: string; }) => {
+            newMessageHistory.push({
+              content: file.path, // change with URL of file in server
+              timestamp: new Date(),
+              sender: chatRoomRef.current.user,
+              type: EMessageType.File,
             });
           });
           setMessageHistory(newMessageHistory);
@@ -87,6 +99,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
               <source src={message.content} type="video/mp4" />
               Your browser does not support the video tag.
             </video> : null}
+          {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
           <span>{getTimeFormatted(message.timestamp)}</span>
           {message.sender === chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>

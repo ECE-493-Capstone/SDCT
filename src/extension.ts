@@ -104,6 +104,11 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel?.webview.postMessage({command: "media", media});
 	});
 
+	const sendFileDisposable = vscode.commands.registerCommand("sdct.sendFile", (chatRoom: IChatRoom, file: vscode.Uri[]) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "file", file});
+	});
+
 	context.subscriptions.push(
 		loginDisposable,
 		logoutDisposable, 
@@ -114,6 +119,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openVoiceChatDisposable,
 		openCodeSessionDisposable,
 		sendMediaDisposable,
+		sendFileDisposable
 	);
 }
 

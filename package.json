@@ -51,6 +51,10 @@
       {
         "command": "sdct.sendMedia",
         "title": "SDCT: Send Media"
+      },
+      {
+        "command": "sdct.sendFile",
+        "title": "SDCT: Send File"
       }
     ],
     "viewsContainers": {

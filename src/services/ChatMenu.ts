@@ -21,7 +21,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         if (chosenOption === "Send Media") {
             await sendMedia(chatRoom);
         } else if (chosenOption === "Send File") {
-            return;
+            await sendFile(chatRoom);
         } else if (chosenOption === "Send Code Message") {
             return;
         } else if (chosenOption === "Leave Group") {
@@ -46,6 +46,20 @@ const sendMedia = async (chatRoom: IChatRoom) => {
     });
     if (!!media) {
         vscode.commands.executeCommand("sdct.sendMedia", chatRoom, media);
+    }
+};
+
+const sendFile = async (chatRoom: IChatRoom) => {
+    const file = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: true,
+        filters: {
+            'All Files': ['*']
+        }
+    });
+    if (!!file) {
+        vscode.commands.executeCommand("sdct.sendFile", chatRoom, file);
     }
 };
 
