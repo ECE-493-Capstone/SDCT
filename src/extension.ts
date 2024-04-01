@@ -112,7 +112,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
-		openCodeSessionDisposable
+		openCodeSessionDisposable,
+		sendMediaDisposable,
 	);
 }
 
