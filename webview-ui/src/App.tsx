@@ -8,6 +8,7 @@ import CodeSessionPage from "./pages/CodeSessionPage";
 import { IChatRoom } from "../../src/interfaces/IChatRoom";
 import { IMessage } from "../../src/interfaces/IMessage";
 import { IUser } from "../../src/interfaces/IUser";
+import { EMessageType } from "../../src/enums/EMessageType";
 
 const defaultChatRoom: IChatRoom = {user: {name: "", pictureUri: ""}, friends: [], joinedCodeSession: false, joinedVoiceChat: false};
 
@@ -34,9 +35,10 @@ function App() {
           break;
         case 'new message':
           const newMessage = {
-            text: message.message.text,
+            content: message.message.text,
             timestamp: new Date(message.message.timestamp),
             sender: message.message.sender,
+            type: EMessageType.Text
           };
           handleNewMessage(newMessage);
           break;

@@ -2,9 +2,20 @@ main {
   height: 100%;
 }
 
-form {
-  position: absolute;
+.chatForm {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  display: flex;
+}
+
+.menuButton {
+  position: fixed;
   bottom: 0;
   left: 0;
   display: flex;
+}
+
+.chatInput {
+  width: 600px;
 }

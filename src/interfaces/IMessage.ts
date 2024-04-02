@@ -1,7 +1,10 @@
 import { IUser } from './IUser';
+import { EMessageType } from '../enums/EMessageType';
 
 export interface IMessage {
-    text: string;
+    content: string;
     timestamp: Date;
     sender: IUser;
+    type: EMessageType;
+    language?: string;
 }
