@@ -50,7 +50,7 @@ export class BackendAPI {
     }
 
     async login(user: IUser): Promise<boolean>{
-        const apiData = await this.postRequest("/login", {Username: user.name});
+        const apiData = await this.postRequest("/login", {Username: user.name, ImageURL: user.pictureUri});
 
         if(apiData){
             const data_json = await apiData.json() as {id: string};
