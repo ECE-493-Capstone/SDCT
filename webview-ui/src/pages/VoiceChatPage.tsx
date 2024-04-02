@@ -4,8 +4,10 @@ import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 
 function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
+  const [isMuted, setIsMuted] = useState(false);
+
   const handleMute = () => {
-    
+    setIsMuted(!isMuted);
   };
 
   const handleEndCall = () => {
@@ -24,7 +26,7 @@ function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
         <span key={friend.name}>{friend.name + "\t"}</span>
       ))}
       <br/>
-      <VSCodeButton appearance="secondary" onClick={handleMute}>Mute</VSCodeButton>
+      <VSCodeButton appearance={isMuted ? "primary" : "secondary"} onClick={handleMute}>{isMuted ? "🔇" : "🔈"}</VSCodeButton>
       <VSCodeButton appearance="primary" onClick={handleEndCall}>End Call</VSCodeButton>
     </main>
   );
