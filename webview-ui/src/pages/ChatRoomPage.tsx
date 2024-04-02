@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
+import { EMessageType } from "../../../src/enums/EMessageType";
 
 function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], handleNewMessage: (message: IMessage) => void}) {
   const [message, setMessage] = useState("");
@@ -16,7 +17,12 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
 
   const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newMessage = {text: message, timestamp: new Date(), sender: props.chatRoom.user}
+    const newMessage = {
+      content: message, 
+      timestamp: new Date(), 
+      sender: props.chatRoom.user,
+      type: EMessageType.Text
+    };
 
     props.handleNewMessage(newMessage);
     vscode.postMessage({
@@ -41,7 +47,7 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
       {props.messageHistory.map((message, index) => (
         <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
           {message.sender !== props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-          <span>{message.text} </span>
+          <span>{message.content} </span>
           <span>{getTimeFormatted(message.timestamp)}</span>
           {message.sender === props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
         </div>
