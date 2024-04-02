@@ -55,6 +55,10 @@
       {
         "command": "sdct.sendFile",
         "title": "SDCT: Send File"
+      },
+      {
+        "command": "sdct.sendCodeMessage",
+        "title": "SDCT: Send Code Message"
       }
     ],
     "viewsContainers": {
