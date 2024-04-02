@@ -10,7 +10,6 @@ import { EMessageType } from "../../../src/enums/EMessageType";
 function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], handleNewMessage: (message: IMessage) => void}) {
   const [message, _setMessage] = useState("");
   const chatRoomRef = useRef(props.chatRoom);
-  const messageHistoryRef = useRef(props.messageHistory);
   const messageRef = useRef(message);
   const setMessage = (data: string) => {
     messageRef.current = data;
@@ -39,7 +38,7 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
             vscode.postMessage({
               command: 'sendChatMessage',
               message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
               });
           });
         case 'file':
@@ -58,7 +57,7 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
             vscode.postMessage({
               command: 'sendChatMessage',
               message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
               });
           });
         case 'code':
@@ -75,7 +74,7 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
             vscode.postMessage({
               command: 'sendChatMessage',
               message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
               });
           });
           setMessage("");
@@ -86,10 +85,6 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   useEffect(() => {
     chatRoomRef.current = props.chatRoom;
   }, [props.chatRoom]);
-  
-  useEffect(() => {
-    messageHistoryRef.current = props.messageHistory;
-  }, [props.messageHistory]);
 
   const handleOpenMenu = () => {
     vscode.postMessage({

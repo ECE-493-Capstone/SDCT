@@ -15,10 +15,15 @@ const defaultChatRoom: IChatRoom = {user: {name: "", pictureUri: ""}, friends: [
 function App() {
   const [page, setPage] = useState<EPage>(EPage.ChatRoom);
   const [chatRoom, setChatRoom] = useState<IChatRoom>(defaultChatRoom);
-  const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
+  const [messageHistory, _setMessageHistory] = useState<IMessage[]>([]);
+  const messageHistoryRef = useRef(messageHistory);
+  const setMessageHistory = (data: IMessage[]) => {
+    messageHistoryRef.current = data;
+    _setMessageHistory(data);
+  };
 
   const handleNewMessage = (message: IMessage) => {
-    let newMessageHistory = [...messageHistory];
+    let newMessageHistory = [...messageHistoryRef.current];
     newMessageHistory.push(message);
     setMessageHistory(newMessageHistory);
   };
