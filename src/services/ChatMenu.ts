@@ -22,7 +22,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         if (chosenOption === "Send Media") {
             await sendMedia(chatRoom);
         } else if (chosenOption === "Send File") {
-            await sendMedia(chatRoom);
+            await sendFile(chatRoom);
         } else if (chosenOption === "Send Code Message") {
             await sendCodeMessage(chatRoom);
         } else if (chosenOption === "Leave Group") {

@@ -34,6 +34,14 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
               type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
             });
           });
+          newMessages.forEach((newMessage) => {
+            props.handleNewMessage(newMessage);
+            vscode.postMessage({
+              command: 'sendChatMessage',
+              message: newMessage,
+              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              });
+          });
         case 'file':
           const files = message.file;
           // send file
@@ -45,6 +53,14 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
               type: EMessageType.File,
             });
           });
+          newMessages.forEach((newMessage) => {
+            props.handleNewMessage(newMessage);
+            vscode.postMessage({
+              command: 'sendChatMessage',
+              message: newMessage,
+              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              });
+          });
         case 'code':
           const language = message.language;
           newMessages.push({
@@ -54,16 +70,16 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
             type: EMessageType.Code,
             language
           });
+          newMessages.forEach((newMessage) => {
+            props.handleNewMessage(newMessage);
+            vscode.postMessage({
+              command: 'sendChatMessage',
+              message: newMessage,
+              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+              });
+          });
           setMessage("");
       };
-      newMessages.forEach((newMessage) => {
-        props.handleNewMessage(newMessage);
-        vscode.postMessage({
-          command: 'sendChatMessage',
-          message: newMessage,
-          roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
-          });
-      });
     });
   }, []);
 
