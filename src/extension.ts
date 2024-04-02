@@ -114,15 +114,46 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const openVoiceChatDisposable = vscode.commands.registerCommand("sdct.openVoiceChat", (chatRoom: IChatRoom) => {
+		const chatRooms = [...chatListProvider.getCurrentData()];
+		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+		const chatRoomIndex = chatRooms.findIndex(chat => {
+			const chatId = chat.groupId ? chat.groupId : chat.name;
+			return chatId === chatRoomId;
+		});
+		chatRooms[chatRoomIndex].voiceChatActive = true;
+		chatListProvider.setData(chatRooms);
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
 	});
 
 	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
+		const chatRooms = [...chatListProvider.getCurrentData()];
+		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+		const chatRoomIndex = chatRooms.findIndex(chat => {
+			const chatId = chat.groupId ? chat.groupId : chat.name;
+			return chatId === chatRoomId;
+		});
+		chatRooms[chatRoomIndex].codeSessionActive = true;
+		chatListProvider.setData(chatRooms);
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
 	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (roomId: string, message: IMessage) => {
 		backendSocket.getSocket().emit("send chat message", roomId, message);
+	});
+
+	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, media: vscode.Uri[]) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "media", media});
+	});
+
+	const sendFileDisposable = vscode.commands.registerCommand("sdct.sendFile", (chatRoom: IChatRoom, file: vscode.Uri[]) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "file", file});
+	});
+
+	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, language: string) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "code", language});
 	});
 
 	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", () => {
@@ -143,7 +174,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		}).catch(err => {
 			console.log("Login Error", err);
-		})
+		});
 	});
 
 	context.subscriptions.push(
@@ -156,7 +187,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
 		openCodeSessionDisposable,
-		sendChatMessage
+		sendChatMessage,
+		sendMediaDisposable,
+		sendFileDisposable,
+		sendCodeMessageDisposable
 	);
 }
 

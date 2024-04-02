@@ -11,6 +11,15 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   private _onDidChangeTreeData: vscode.EventEmitter<IChat | undefined | null | void> = new vscode.EventEmitter<IChat | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
 
+  public getCurrentData(): IChat[] {
+    return this.data;
+  }
+
+  public setData(data: IChat[]): void {
+    this.data = data;
+    this._onDidChangeTreeData.fire();
+  }
+
   async refresh(context: vscode.ExtensionContext): Promise<void> {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this.data = await this.getData();
