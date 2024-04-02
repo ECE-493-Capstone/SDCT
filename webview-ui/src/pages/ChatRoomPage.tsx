@@ -122,26 +122,27 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   
   return (
     <main>
-      {props.messageHistory.map((message, index) => (
-        <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
-          {message.sender !== props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-          {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
-          {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
-          {message.type === EMessageType.MediaVideo ? 
-            <video width="200" height="150" controls>
-              <source src={message.content} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video> : null}
-          {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
-          {message.type === EMessageType.Code ?
-            <SyntaxHighlighter language={message.language} style={docco}>
-              {message.content}
-            </SyntaxHighlighter> : null}
-          <span>{getTimeFormatted(message.timestamp)}</span>
-          {message.sender === props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-        </div>
-      ))}
-      {}
+      <div className="chatContent">
+        {props.messageHistory.map((message, index) => (
+          <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
+            {message.sender !== props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
+            {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
+            {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
+            {message.type === EMessageType.MediaVideo ? 
+              <video width="200" height="150" controls>
+                <source src={message.content} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video> : null}
+            {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
+            {message.type === EMessageType.Code ?
+              <SyntaxHighlighter language={message.language} style={docco}>
+                {message.content}
+              </SyntaxHighlighter> : null}
+            <span>{getTimeFormatted(message.timestamp)}</span>
+            {message.sender === props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
+          </div>
+        ))}
+      </div>
       <VSCodeButton className="menuButton" appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
       <form className="chatForm" onSubmit={handleSendMessage}>
         <VSCodeTextField className="chatInput" value={message} onInput={e => {
