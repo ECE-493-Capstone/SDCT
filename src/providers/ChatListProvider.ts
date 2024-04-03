@@ -74,8 +74,8 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     let data: IChat[] = [];
 
     if(this.cprovider){
-      const friendData = await this.cprovider.getFriendChatList();
-      const groupData = await this.cprovider.getGroupChatList();
+      const friendData = await this.cprovider.getFriends();
+      const groupData = await this.cprovider.getGroups();
 
       data.push(...friendData);
       data.push(...groupData);

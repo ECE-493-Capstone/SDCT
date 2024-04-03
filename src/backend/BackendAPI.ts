@@ -1,6 +1,6 @@
 import { IUser } from '../interfaces/IUser';
 import { IChat } from "../interfaces/IChat";
-import { IApiFriendChatList, IApiGroupChatList } from "../interfaces/IBackendApi"
+import { IApiFriend, IApiGroupChatList } from "../interfaces/IBackendApi"
 
 export class BackendAPI {
     private userID: string = "";
@@ -63,29 +63,52 @@ export class BackendAPI {
     }
 
 
-    async getFriendNotifactionList(): Promise<IChat[]> {
+    async getFriends(): Promise<IChat[]> {
         let data: IChat[] = [];
-        const apiData = await this.getRequest(`/list_chats_friends/${this.userID}`);
+        const apiData = await this.getRequest(`/get_friends/${this.userID}`);
         
         if(apiData){
-            const data_json = await apiData.json() as {data: IApiFriendChatList[]};
-            console.log(data_json);
-            for(let chat of data_json.data){
-                // Perform UTC Conversion
-                const date =  new Date(0);
-                date.setUTCSeconds(chat.MessageTime);
+            const data_json = await apiData.json() as {data: IApiFriend[]};
 
+            for(let chat of data_json.data){
+                const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
                 data.push({
-                    name: chat.Username,
-                    lastMessage: chat.MessageText,
-                    lastMessageTime: date,
-                    pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
-                    notificationCount: 100, //TODO: ADD
-                    voiceChatActive: false, //TODO: ADD 
-                    codeSessionActive: false,//TODO: ADD
-                    friendId: chat.rowid.toString(),
-                    groupId: undefined,
-                  });
+                    name: friendId,
+                    LastMessage: "", // Default value
+                    LastMessageTime: new Date(), // Default value
+                    PictureUri: chat.ImageURL,
+                    NotificationCount: 0, // Default value
+                    VoiceChatActive: false, // Default value
+                    CodeSessionActive: false,// Default value
+                    FriendId: friendId,
+                    GroupId: undefined,
+                });
+            }
+        }
+
+        return data;
+    }
+
+    async getGroups(): Promise<IChat[]> {
+        let data: IChat[] = [];
+        const apiData = await this.getRequest(`/get_friends/${this.userID}`);
+        
+        if(apiData){
+            const data_json = await apiData.json() as {data: IApiFriend[]};
+
+            for(let chat of data_json.data){
+                const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
+                data.push({
+                    name: friendId,
+                    LastMessage: "", // Default value
+                    LastMessageTime: new Date(), // Default value
+                    PictureUri: chat.ImageURL,
+                    NotificationCount: 0, // Default value
+                    VoiceChatActive: false, // Default value
+                    CodeSessionActive: false,// Default value
+                    FriendId: friendId,
+                    GroupId: undefined,
+                });
             }
         }
 
