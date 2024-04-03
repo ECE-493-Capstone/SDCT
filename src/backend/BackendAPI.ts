@@ -1,4 +1,3 @@
-import { io, Socket } from "socket.io-client";
 import { IUser } from '../interfaces/IUser';
 import { IChat } from "../interfaces/IChat";
 import { IApiFriendChatList, IApiGroupChatList } from "../interfaces/IBackendApi"
@@ -50,12 +49,12 @@ export class BackendAPI {
     }
 
     async login(user: IUser): Promise<boolean>{
-        const apiData = await this.postRequest("/login", {Username: user.name, ImageURL: user.pictureUri});
+        const apiData = await this.postRequest("/login", {UserId: user.name, ImageURL: user.pictureUri});
 
         if(apiData){
-            const data_json = await apiData.json() as {id: string};
-            if(data_json.id){
-                this.userID = data_json.id;
+            const data_json = await apiData.json() as {message: string};
+            if(data_json.message === "success"){
+                this.userID = user.name;
                 return true;
             }
         }
@@ -63,7 +62,8 @@ export class BackendAPI {
         return false;
     }
 
-    async getFriendChatList(): Promise<IChat[]> {
+
+    async getFriendNotifactionList(): Promise<IChat[]> {
         let data: IChat[] = [];
         const apiData = await this.getRequest(`/list_chats_friends/${this.userID}`);
         
@@ -92,34 +92,63 @@ export class BackendAPI {
         return data;
     }
 
-    async getGroupChatList(): Promise<IChat[]> {
-        let data: IChat[] = [];
-        const apiData = await this.getRequest(`/list_chats_groups/${this.userID}`);
+    // async getFriendChatList(): Promise<IChat[]> {
+    //     let data: IChat[] = [];
+    //     const apiData = await this.getRequest(`/list_chats_friends/${this.userID}`);
         
-        if(apiData){
-            const data_json = await apiData.json() as {data: IApiGroupChatList[]};
-            console.log(data_json);
-            for(let chat of data_json.data){
-                // Perform UTC Conversion
-                const date =  new Date(0);
-                date.setUTCSeconds(chat.MessageTime);
+    //     if(apiData){
+    //         const data_json = await apiData.json() as {data: IApiFriendChatList[]};
+    //         console.log(data_json);
+    //         for(let chat of data_json.data){
+    //             // Perform UTC Conversion
+    //             const date =  new Date(0);
+    //             date.setUTCSeconds(chat.MessageTime);
 
-                data.push({
-                    name: chat.GroupName,
-                    lastMessage: chat.MessageText,
-                    lastMessageTime: date,
-                    pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
-                    notificationCount: 100, //TODO: ADD
-                    voiceChatActive: false, //TODO: ADD 
-                    codeSessionActive: false,//TODO: ADD
-                    friendId: undefined,
-                    groupId: chat.GroupId.toString(),
-                  });
-            }
-        }
+    //             data.push({
+    //                 name: chat.Username,
+    //                 lastMessage: chat.MessageText,
+    //                 lastMessageTime: date,
+    //                 pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
+    //                 notificationCount: 100, //TODO: ADD
+    //                 voiceChatActive: false, //TODO: ADD 
+    //                 codeSessionActive: false,//TODO: ADD
+    //                 friendId: chat.rowid.toString(),
+    //                 groupId: undefined,
+    //               });
+    //         }
+    //     }
 
-        return data;
-    }
+    //     return data;
+    // }
+
+    // async getGroupChatList(): Promise<IChat[]> {
+    //     let data: IChat[] = [];
+    //     const apiData = await this.getRequest(`/list_chats_groups/${this.userID}`);
+        
+    //     if(apiData){
+    //         const data_json = await apiData.json() as {data: IApiGroupChatList[]};
+    //         console.log(data_json);
+    //         for(let chat of data_json.data){
+    //             // Perform UTC Conversion
+    //             const date =  new Date(0);
+    //             date.setUTCSeconds(chat.MessageTime);
+
+    //             data.push({
+    //                 name: chat.GroupName,
+    //                 lastMessage: chat.MessageText,
+    //                 lastMessageTime: date,
+    //                 pictureUri: `https://picsum.photos/seed/1/200/200`, //TODO: ADD
+    //                 notificationCount: 100, //TODO: ADD
+    //                 voiceChatActive: false, //TODO: ADD 
+    //                 codeSessionActive: false,//TODO: ADD
+    //                 friendId: undefined,
+    //                 groupId: chat.GroupId.toString(),
+    //               });
+    //         }
+    //     }
+
+    //     return data;
+    // }
 
     async addFriend(friend: string): Promise<boolean>{
         const apiData = await this.postRequest(`/add_friend`, {UserId: this.userID, FriendId: friend});
