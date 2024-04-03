@@ -8,6 +8,7 @@ function VoiceChatPage({chatRoom}: {chatRoom: IChatRoom}) {
 
   const handleMute = () => {
     setIsMuted(!isMuted);
+    vscode.postMessage({command: 'muteVoiceChat'});
   };
 
   const handleEndCall = () => {

@@ -87,6 +87,7 @@ export class VoiceChatPanel {
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
+    commands.executeCommand('sdct.endVoiceChat');
     VoiceChatPanel.currentPanels.delete(this._id);
 
     // Dispose of the current webview panel
@@ -153,6 +154,9 @@ export class VoiceChatPanel {
         switch (command) {
           case "endVoiceChat":
             this.dispose();
+            break;
+          case "muteVoiceChat":
+            commands.executeCommand('sdct.muteVoiceChat');
             break;
         }
       },

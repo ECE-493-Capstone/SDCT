@@ -29,3 +29,8 @@ export interface IApiFriend{
     FriendId: string,
     UserId: string
 }
+
+export interface IApiGroup{
+    GroupId: number,
+    GroupName: string,
+}

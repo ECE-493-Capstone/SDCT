@@ -6,7 +6,7 @@ import { BackendAPI } from '../backend/BackendAPI'
 export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   private data: IChat[] = [];
   private authenticated: boolean;
-  private cprovider: BackendAPI | undefined;
+  private backendApi: BackendAPI | undefined;
   private searchQuery: string | undefined;
   private _onDidChangeTreeData: vscode.EventEmitter<IChat | undefined | null | void> = new vscode.EventEmitter<IChat | undefined | null | void>();
   readonly onDidChangeTreeData: vscode.Event<IChat | undefined | null | void> = this._onDidChangeTreeData.event;
@@ -26,9 +26,9 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     this._onDidChangeTreeData.fire();
   }
 
-  constructor(context: vscode.ExtensionContext, cprovider: BackendAPI) {
+  constructor(context: vscode.ExtensionContext, backendApi: BackendAPI) {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
-    this.cprovider = cprovider;
+    this.backendApi = backendApi;
   }
 
   getTreeItem(element: IChat): vscode.TreeItem {
@@ -73,12 +73,38 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
   async getData(): Promise<IChat[]> {
     let data: IChat[] = [];
 
-    if(this.cprovider){
-      const friendData = await this.cprovider.getFriends();
-      const groupData = await this.cprovider.getGroups();
+    if(this.backendApi){
+      const friendData = await this.backendApi.getFriends();
 
-      data.push(...friendData);
-      data.push(...groupData);
+      for(let friend of friendData){
+        data.push({
+          name: friend.FriendId.toString(),
+          lastMessage: "", // Default value
+          lastMessageTime: new Date(), // Default value
+          pictureUri: friend.ImageURL,
+          notificationCount: 0, // Default value
+          voiceChatActive: false, // Default value
+          codeSessionActive: false,// Default value
+          friendId: friend.FriendId.toString(),
+          groupId: undefined,
+        });
+      }
+
+      const groupData = await this.backendApi.getGroups();
+
+      for(let group of groupData){
+        data.push({
+          name: group.GroupName,
+          lastMessage: "", // Default value
+          lastMessageTime: new Date(), // Default value
+          pictureUri: "",
+          notificationCount: 0, // Default value
+          voiceChatActive: false, // Default value
+          codeSessionActive: false,// Default value
+          friendId: undefined,
+          groupId: group.GroupId.toString(),
+        });
+      }
     }
     return data;
   }

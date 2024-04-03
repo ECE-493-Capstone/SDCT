@@ -1,6 +1,6 @@
 import { IUser } from '../interfaces/IUser';
 import { IChat } from "../interfaces/IChat";
-import { IApiFriend, IApiGroupChatList } from "../interfaces/IBackendApi"
+import { IApiFriend, IApiGroup, IApiGroupChatList } from "../interfaces/IBackendApi"
 
 export class BackendAPI {
     private userID: string = "";
@@ -50,7 +50,7 @@ export class BackendAPI {
 
     async login(user: IUser): Promise<boolean>{
         const apiData = await this.postRequest("/login", {UserId: user.name, ImageURL: user.pictureUri});
-
+        console.log(user);
         if(apiData){
             const data_json = await apiData.json() as {message: string};
             if(data_json.message === "success"){
@@ -62,57 +62,36 @@ export class BackendAPI {
         return false;
     }
 
+    async getFriends(): Promise<IApiFriend[]>{
+        const friends = await this.getRequest(`/get_friends/${this.userID}`);
 
-    async getFriends(): Promise<IChat[]> {
-        let data: IChat[] = [];
-        const apiData = await this.getRequest(`/get_friends/${this.userID}`);
-        
-        if(apiData){
-            const data_json = await apiData.json() as {data: IApiFriend[]};
-
-            for(let chat of data_json.data){
-                const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
-                data.push({
-                    name: friendId,
-                    lastMessage: "", // Default value
-                    lastMessageTime: new Date(), // Default value
-                    pictureUri: chat.ImageURL,
-                    notificationCount: 0, // Default value
-                    voiceChatActive: false, // Default value
-                    codeSessionActive: false,// Default value
-                    friendId: friendId,
-                    groupId: undefined,
-                });
+        let friendList: IApiFriend[] = []
+        if(friends){
+            const data = await friends.json() as {data: IApiFriend[]};
+            if(data){
+                for(let friend of data.data ){
+                    friend.FriendId = friend.FriendId === this.userID ? friend.UserId : friend.FriendId
+                    friendList.push(friend);
+                }
             }
         }
 
-        return data;
+        return friendList;
     }
 
-    async getGroups(): Promise<IChat[]> {
-        let data: IChat[] = [];
-        const apiData = await this.getRequest(`/get_friends/${this.userID}`);
+    async getGroups(): Promise<IApiGroup[]> {
+        const apiData = await this.getRequest(`/get_groups/${this.userID}`);
         
+        let groupList: IApiGroup[] = [];
         if(apiData){
-            const data_json = await apiData.json() as {data: IApiFriend[]};
+            const data_json = await apiData.json() as {data: IApiGroup[]};
 
-            for(let chat of data_json.data){
-                const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
-                data.push({
-                    name: friendId,
-                    lastMessage: "", // Default value
-                    lastMessageTime: new Date(), // Default value
-                    pictureUri: chat.ImageURL,
-                    notificationCount: 0, // Default value
-                    voiceChatActive: false, // Default value
-                    codeSessionActive: false,// Default value
-                    friendId: friendId,
-                    groupId: undefined,
-                });
+            for(let group of data_json.data){
+                groupList.push(group);
             }
         }
 
-        return data;
+        return groupList;
     }
 
     // async getFriendChatList(): Promise<IChat[]> {
@@ -224,6 +203,28 @@ export class BackendAPI {
         const apiData = await this.postRequest(`/decline_invite_friend`, {FriendId: friend, UserId: this.userID});
         
         if(apiData){
+            return true;
+        }
+
+        return false;
+    }
+
+    async createGroup(name: string): Promise<number | undefined>{
+        const apiData = await this.postRequest(`/create_group`, {GroupName: name});
+
+        if(apiData){
+            const data_json = await apiData.json() as {id: number};
+            if(data_json.id){
+                return data_json.id;
+            }
+        }
+
+        return undefined;
+    }
+
+    async addUserToGroup(groupId: number, userId: string): Promise<boolean>{
+        const success = await this.postRequest(`/invite_group`, {GroupId: groupId, UserId: userId});
+        if(success){
             return true;
         }
 

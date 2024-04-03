@@ -13,8 +13,15 @@ import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
 import { BackendAPI } from './backend/BackendAPI';
-import { BackendSocket } from './backend/BackendSocket'
+import { BackendSocket, VoiceSocket } from './backend/BackendSocket'
 import { IMessage } from './interfaces/IMessage';
+import { IFriend } from "./interfaces/IFriend"
+import { spawn, ChildProcessWithoutNullStreams} from "child_process"
+
+const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
+const ApiPort = 8000;
+const SocketPort = 3000;
+const VoicePort = 3001;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -27,8 +34,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	const credentials = new Credentials();
 	await credentials.initialize(context);
 	
-	const backendAPI = new BackendAPI("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 8000);
-	const backendSocket = new BackendSocket("http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]", 3000);
+	const backendAPI = new BackendAPI(BackendURL, ApiPort);
+	const backendSocket = new BackendSocket(BackendURL, SocketPort);
+	const voiceSocket = new VoiceSocket(backendSocket)
 
 	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
@@ -39,7 +47,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		treeDataProvider: profileProvider
 	});
 
-
+	var voiceSession: ChildProcessWithoutNullStreams;
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -86,15 +94,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		const userAuth = context.globalState.get<IUser>('userAuth');
 		const emptyUser: IUser = { name: "", pictureUri: "" };
 		const user = userAuth ? userAuth : emptyUser;
-		const friends: IUser[] = [];
-		if (chat.groupId) {
-			for (let i = 0; i < 3; i++) { // MOCK DATA
-				const friend: IUser = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
-				friends.push(friend);
-			}
-		} else {
-			const friend: IUser = { name: chat.name, pictureUri: chat.pictureUri };
+		const friends: IFriend[] = [];
+		if (chat.friendId) {
+			const friend: IFriend = { name: chat.name, friendid: chat.friendId,pictureUri: chat.pictureUri };
 			friends.push(friend);
+		} else {
+			// for (let i = 0; i < 3; i++) { // MOCK DATA
+			// 	const friend: IFriend = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
+			// 	friends.push(friend);
+			// }
 		}
 		const chatRoom: IChatRoom = {
 			user,
@@ -104,8 +112,6 @@ export async function activate(context: vscode.ExtensionContext) {
 			friendId: chat.friendId,
 			groupId: chat.groupId
 		};
-		const socketChatRoom = chat.groupId ? chat.groupId : chat.friendId;
-		backendSocket.getSocket().emit("join chat", socketChatRoom);
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 	});
 
@@ -120,9 +126,29 @@ export async function activate(context: vscode.ExtensionContext) {
 			const chatId = chat.groupId ? chat.groupId : chat.name;
 			return chatId === chatRoomId;
 		});
+		// Validate only one voicechat at a time
+		if(VoiceChatPanel.currentPanels.size >= 1){
+			vscode.window.showErrorMessage("You may only be in 1 voicechat at a time")
+			return;
+		}
+
 		chatRooms[chatRoomIndex].voiceChatActive = true;
 		chatListProvider.setData(chatRooms);
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
+		voiceSocket.startVoiceChat(chatRoomId);
+
+		voiceSession = spawn('python3',["src/python/audio_socketio.py", voiceSocket.getSocketInfo(), chatRoomId], {cwd: context.extensionPath});
+		voiceSession.stdout.on("data", (data) => {
+			console.log(`stdout: ${data}`);
+		  });
+		  
+		voiceSession.stderr.on("data", (data) => {
+			console.error(`stderr: ${data}`);
+		});
+		
+		voiceSession.on("close", (code) => {
+			console.log(`child process exited with code ${code}`);
+		});
 	});
 
 	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
@@ -154,6 +180,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, language: string) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "code", language});
+	});
+	const muteVoiceChatDisposable = vscode.commands.registerCommand("sdct.muteVoiceChat", () => {
+		console.log("mute");
+		VoiceSocket.muteVoiceChat();
+	});
+
+	const endVoiceChatDisposable = vscode.commands.registerCommand("sdct.endVoiceChat", () => {
+		console.log("kill");
+		VoiceSocket.endVoiceChat();
+		voiceSession.kill();
 	});
 
 	const mockLogin = vscode.commands.registerCommand("sdct.mockLogin", () => {
@@ -190,7 +226,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		sendChatMessage,
 		sendMediaDisposable,
 		sendFileDisposable,
-		sendCodeMessageDisposable
+		sendCodeMessageDisposable,
+		muteVoiceChatDisposable,
+		endVoiceChatDisposable
 	);
 }
 

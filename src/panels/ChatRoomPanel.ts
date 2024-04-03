@@ -25,15 +25,23 @@ export class ChatRoomPanel {
   }
 
   public static getChatRoomId(chatRoom: IChatRoom): string {
-    return chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    if(chatRoom.groupId){
+      return chatRoom.groupId;
+    } else if(chatRoom.friendId){
+      return chatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
+    }
   }
 
   public static getChatRoomName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
       const groupName = chatRoom.groupId; // FETCH ACTUAL GROUP NAME
       return groupName;
-    } else {
-      return chatRoom.friends[0].name;
+    } else if(chatRoom.friendId){
+      return chatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
     }
   }
 
