@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IUser } from '../interfaces/IUser';
-import { IChat } from '../interfaces/IChat';
+import { IChat } from '../interfaces/INotification';
 import { BackendAPI } from '../backend/BackendAPI'
 
 export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
