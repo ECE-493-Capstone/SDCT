@@ -10,7 +10,6 @@ import { EMessageType } from "../../../src/enums/EMessageType";
 function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], handleNewMessage: (message: IMessage) => void}) {
   const [message, _setMessage] = useState("");
   const chatRoomRef = useRef(props.chatRoom);
-  const messageHistoryRef = useRef(props.messageHistory);
   const messageRef = useRef(message);
   const setMessage = (data: string) => {
     messageRef.current = data;
@@ -20,63 +19,52 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   useEffect(() => {
     window.addEventListener('message', event => {
       const message = event.data;
-      const newMessages: IMessage[] = [];
       switch (message.command) {
         case 'media':
-          const medias = message.media;
+          const media = message.media[0];
           // send media
-          medias.forEach((media: { path: string; }) => {
-            const isVideo = media.path.endsWith('.mp4');
-            newMessages.push({
-              content: media.path, // change with URL of media in server
-              timestamp: new Date(),
-              sender: chatRoomRef.current.user,
-              type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
-            });
-          });
-          newMessages.forEach((newMessage) => {
-            props.handleNewMessage(newMessage);
-            vscode.postMessage({
-              command: 'sendChatMessage',
-              message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
-              });
+          const isVideo = media.path.endsWith('.mp4');
+          const mediaMessage = {
+            content: media.path, // change with URL of media in server
+            timestamp: new Date(),
+            sender: chatRoomRef.current.user,
+            type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
+          };
+          props.handleNewMessage(mediaMessage);
+          vscode.postMessage({
+            command: 'sendChatMessage',
+            message: mediaMessage,
+            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
           });
         case 'file':
-          const files = message.file;
+          const file = message.file[0];
           // send file
-          files.forEach((file: { path: string; }) => {
-            newMessages.push({
-              content: file.path, // change with URL of file in server
-              timestamp: new Date(),
-              sender: chatRoomRef.current.user,
-              type: EMessageType.File,
-            });
-          });
-          newMessages.forEach((newMessage) => {
-            props.handleNewMessage(newMessage);
-            vscode.postMessage({
-              command: 'sendChatMessage',
-              message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
-              });
+          const fileMessage = {
+            content: file.path, // change with URL of file in server
+            timestamp: new Date(),
+            sender: chatRoomRef.current.user,
+            type: EMessageType.File
+          };
+          props.handleNewMessage(fileMessage);
+          vscode.postMessage({
+            command: 'sendChatMessage',
+            message: fileMessage,
+            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
           });
         case 'code':
           const language = message.language;
-          newMessages.push({
+          const codeMessage = {
             content: messageRef.current,
             timestamp: new Date(),
             sender: chatRoomRef.current.user,
             type: EMessageType.Code,
             language
-          });
-          newMessages.forEach((newMessage) => {
-            props.handleNewMessage(newMessage);
-            vscode.postMessage({
-              command: 'sendChatMessage',
-              message: newMessage,
-              roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
-              });
+          };
+          props.handleNewMessage(codeMessage);
+          vscode.postMessage({
+            command: 'sendChatMessage',
+            message: codeMessage,
+            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
           });
           setMessage("");
       };
@@ -86,10 +74,6 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   useEffect(() => {
     chatRoomRef.current = props.chatRoom;
   }, [props.chatRoom]);
-  
-  useEffect(() => {
-    messageHistoryRef.current = props.messageHistory;
-  }, [props.messageHistory]);
 
   const handleOpenMenu = () => {
     vscode.postMessage({
@@ -127,26 +111,27 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   
   return (
     <main>
-      {props.messageHistory.map((message, index) => (
-        <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
-          {message.sender !== props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-          {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
-          {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
-          {message.type === EMessageType.MediaVideo ? 
-            <video width="200" height="150" controls>
-              <source src={message.content} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video> : null}
-          {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
-          {message.type === EMessageType.Code ?
-            <SyntaxHighlighter language={message.language} style={docco}>
-              {message.content}
-            </SyntaxHighlighter> : null}
-          <span>{getTimeFormatted(message.timestamp)}</span>
-          {message.sender === props.chatRoom.user ? <img src={message.sender.pictureUri} width="20" /> : null}
-        </div>
-      ))}
-      {}
+      <div className="chatContent">
+        {props.messageHistory.map((message, index) => (
+          <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
+            {message.sender !== props.chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+            {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
+            {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
+            {message.type === EMessageType.MediaVideo ? 
+              <video width="200" height="150" controls>
+                <source src={message.content} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video> : null}
+            {message.type === EMessageType.File ? <a href={message.content} download>{message.content}</a> : null}
+            {message.type === EMessageType.Code && !!message.content ?
+              <SyntaxHighlighter language={message.language} style={docco}>
+                {message.content}
+              </SyntaxHighlighter> : null}
+            {!!message.content && <span>{getTimeFormatted(message.timestamp)}</span>}
+            {message.sender === props.chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+          </div>
+        ))}
+      </div>
       <VSCodeButton className="menuButton" appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
       <form className="chatForm" onSubmit={handleSendMessage}>
         <VSCodeTextField className="chatInput" value={message} onInput={e => {

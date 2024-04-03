@@ -41,7 +41,7 @@ const sendMedia = async (chatRoom: IChatRoom) => {
     const media = await vscode.window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
-        canSelectMany: true,
+        canSelectMany: false,
         filters: {
             'Media': ['png', 'jpg', 'jpeg', 'mp4', 'gif'],
             'All Files': ['*']
@@ -56,7 +56,7 @@ const sendFile = async (chatRoom: IChatRoom) => {
     const file = await vscode.window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
-        canSelectMany: true,
+        canSelectMany: false,
         filters: {
             'All Files': ['*']
         }

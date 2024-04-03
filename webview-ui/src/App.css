@@ -19,3 +19,7 @@ main {
 .chatInput {
   width: 600px;
 }
+
+.chatContent {
+  padding-bottom: 50px;
+}
