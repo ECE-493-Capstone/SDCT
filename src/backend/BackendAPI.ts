@@ -74,14 +74,14 @@ export class BackendAPI {
                 const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
                 data.push({
                     name: friendId,
-                    LastMessage: "", // Default value
-                    LastMessageTime: new Date(), // Default value
-                    PictureUri: chat.ImageURL,
-                    NotificationCount: 0, // Default value
-                    VoiceChatActive: false, // Default value
-                    CodeSessionActive: false,// Default value
-                    FriendId: friendId,
-                    GroupId: undefined,
+                    lastMessage: "", // Default value
+                    lastMessageTime: new Date(), // Default value
+                    pictureUri: chat.ImageURL,
+                    notificationCount: 0, // Default value
+                    voiceChatActive: false, // Default value
+                    codeSessionActive: false,// Default value
+                    friendId: friendId,
+                    groupId: undefined,
                 });
             }
         }
@@ -100,14 +100,14 @@ export class BackendAPI {
                 const friendId = chat.FriendId === this.userID ? chat.UserId : chat.FriendId
                 data.push({
                     name: friendId,
-                    LastMessage: "", // Default value
-                    LastMessageTime: new Date(), // Default value
-                    PictureUri: chat.ImageURL,
-                    NotificationCount: 0, // Default value
-                    VoiceChatActive: false, // Default value
-                    CodeSessionActive: false,// Default value
-                    FriendId: friendId,
-                    GroupId: undefined,
+                    lastMessage: "", // Default value
+                    lastMessageTime: new Date(), // Default value
+                    pictureUri: chat.ImageURL,
+                    notificationCount: 0, // Default value
+                    voiceChatActive: false, // Default value
+                    codeSessionActive: false,// Default value
+                    friendId: friendId,
+                    groupId: undefined,
                 });
             }
         }
