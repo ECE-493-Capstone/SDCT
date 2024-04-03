@@ -85,7 +85,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
           notificationCount: 0, // Default value
           voiceChatActive: false, // Default value
           codeSessionActive: false,// Default value
-          friendId: friend.FriendId.toString(),
+          friendId: friend.rowid.toString(),
           groupId: undefined,
         });
       }

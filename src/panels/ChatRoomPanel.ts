@@ -35,11 +35,8 @@ export class ChatRoomPanel {
   }
 
   public static getChatRoomName(chatRoom: IChatRoom): string {
-    if (chatRoom.groupId) {
-      const groupName = chatRoom.groupId; // FETCH ACTUAL GROUP NAME
-      return groupName;
-    } else if(chatRoom.friendId){
-      return chatRoom.friendId;
+    if(chatRoom.name){
+      return chatRoom.name;
     }else {
       throw new Error("ChatRoom has no groupId or friendID");
     }

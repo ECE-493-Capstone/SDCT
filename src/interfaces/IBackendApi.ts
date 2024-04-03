@@ -26,6 +26,7 @@ export interface IApiGroupChatList{
 
 export interface IApiFriend{
     ImageURL: string,
+    rowid: number,
     FriendId: string,
     UserId: string
 }

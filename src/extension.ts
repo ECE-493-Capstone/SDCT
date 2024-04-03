@@ -105,6 +105,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			// }
 		}
 		const chatRoom: IChatRoom = {
+			name: chat.name,
 			user,
 			friends,
 			joinedVoiceChat: false, 
