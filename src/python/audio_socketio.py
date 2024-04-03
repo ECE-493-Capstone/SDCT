@@ -94,6 +94,7 @@ def on_message():
 @sio.event
 def disconnect():
     print('disconnected from server')
+    audio.stop()
 
 audio.run(sys.argv[1], sys.argv[2])
 sio.wait()
