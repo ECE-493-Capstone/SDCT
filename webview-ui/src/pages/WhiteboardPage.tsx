@@ -22,6 +22,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
           if (context) {
             context.lineCap = 'round';
             contextRef.current = context;
+            contextRef.current.strokeStyle = 'white';
           }
         }
     };
@@ -61,7 +62,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 onMouseUp={finishDrawing}
                 onMouseMove={draw}
                 ref={canvasRef}
-                style={{ border: '2px solid black' }}
+                style={{ border: '2px solid white' }}
             ></canvas>
             <div className="whiteboardToolbar">
                 <VSCodeButton appearance="secondary">🖊️</VSCodeButton>
