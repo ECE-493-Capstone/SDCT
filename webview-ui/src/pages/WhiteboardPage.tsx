@@ -51,10 +51,13 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.fillText(textInput, offsetX, offsetY);
                 return;
             } else if (brushType === BrushType.Square) {
-                contextRef.current.fillStyle = "white";
+                contextRef.current.strokeStyle = "white";
+                contextRef.current.lineWidth = 5;
                 contextRef.current.strokeRect(offsetX, offsetY, 50, 50);
                 return;
             } else if (brushType === BrushType.Triangle) {
+                contextRef.current.strokeStyle = "white";
+                contextRef.current.lineWidth = 5;
                 contextRef.current.beginPath();
                 contextRef.current.moveTo(offsetX, offsetY);
                 contextRef.current.lineTo(offsetX + 50, offsetY + 50);
@@ -63,6 +66,8 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.stroke();
                 return;
             } else if (brushType === BrushType.Diamond) {
+                contextRef.current.fillStyle = "white";
+                contextRef.current.strokeStyle = "white";
                 contextRef.current.beginPath();
                 contextRef.current.moveTo(offsetX, offsetY - 50);
                 contextRef.current.lineTo(offsetX + 50, offsetY);
@@ -72,6 +77,8 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.stroke();
                 return;
             } else if (brushType === BrushType.Arrow) {
+                contextRef.current.strokeStyle = "white";
+                contextRef.current.lineWidth = 5;
                 contextRef.current.beginPath();
                 contextRef.current.moveTo(offsetX, offsetY);
                 contextRef.current.lineTo(offsetX + 50, offsetY);
