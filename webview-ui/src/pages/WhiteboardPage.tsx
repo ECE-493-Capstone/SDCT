@@ -101,10 +101,10 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 style={{ border: '2px solid white' }}
             ></canvas>
             <div className="whiteboardToolbar">
-                <VSCodeButton appearance="secondary" onClick={getBrush}>🖊️</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Pen ? "primary" : "secondary"} onClick={getBrush}>🖊️</VSCodeButton>
                 <VSCodeButton appearance="secondary">🔤</VSCodeButton>
                 <VSCodeButton appearance="secondary">🔺</VSCodeButton>
-                <VSCodeButton appearance="secondary" onClick={getEraser}>🧽</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Eraser ? "primary" : "secondary"} onClick={getEraser}>🧽</VSCodeButton>
                 <VSCodeButton appearance="secondary" onClick={clearCanvas}>🗑️</VSCodeButton>
             </div>
         </main>
