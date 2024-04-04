@@ -49,46 +49,46 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
       };
     
     const finishDrawing = () => {
-    if (contextRef.current) {
-        contextRef.current.closePath();
-    }
-    setIsDrawing(false);
+        if (contextRef.current) {
+            contextRef.current.closePath();
+        }
+        setIsDrawing(false);
     };
 
     const draw = ({ nativeEvent }: { nativeEvent: any }) => {
-    if (!isDrawing) {return;};
-    const { offsetX, offsetY } = nativeEvent;
-    if (contextRef.current) {
-        contextRef.current.lineTo(offsetX, offsetY);
-        contextRef.current.stroke();
-    }
+        if (!isDrawing) {return;};
+        const { offsetX, offsetY } = nativeEvent;
+        if (contextRef.current) {
+            contextRef.current.lineTo(offsetX, offsetY);
+            contextRef.current.stroke();
+        }
     };
 
     const getBrush = () => {
-    setBrushType(BrushType.Pen);
-    if (contextRef.current) {
-        contextRef.current.strokeStyle = "white";
-        contextRef.current.lineWidth = 5;
-    }
+        setBrushType(BrushType.Pen);
+        if (contextRef.current) {
+            contextRef.current.strokeStyle = "white";
+            contextRef.current.lineWidth = 5;
+        }
     };
 
     const getEraser = () => {
-    setBrushType(BrushType.Eraser);
-    if (contextRef.current) {
-        contextRef.current.strokeStyle = 'black';
-        contextRef.current.lineWidth = 20;
-    }
+        setBrushType(BrushType.Eraser);
+        if (contextRef.current) {
+            contextRef.current.strokeStyle = 'black';
+            contextRef.current.lineWidth = 20;
+        }
     };
 
     const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-        const context = canvas.getContext('2d');
-        if (context) {
-        context.fillStyle = 'black';
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const context = canvas.getContext('2d');
+            if (context) {
+            context.fillStyle = 'black';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            }
         }
-    }
     };
 
     return (
