@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { IChatRoom } from '../interfaces/IChatRoom';
+import { ChatSocket } from '../backend/BackendSocket';
+import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 
 export async function chatMenu(chatRoom: IChatRoom) {
     const options = [
@@ -48,7 +50,7 @@ const sendMedia = async (chatRoom: IChatRoom) => {
         }
     });
     if (!!media) {
-        vscode.commands.executeCommand("sdct.sendMedia", chatRoom, media);
+        ChatSocket.socketEmit("send media message", ChatRoomPanel.getChatRoomId(chatRoom), file);
     }
 };
 
