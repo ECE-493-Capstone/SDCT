@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { IChatRoom } from '../interfaces/IChatRoom';
 import { ChatSocket } from '../backend/BackendSocket';
 import { ChatRoomPanel } from '../panels/ChatRoomPanel';
+import { readFileSync } from 'fs';
 
 export async function chatMenu(chatRoom: IChatRoom) {
     const options = [
@@ -50,6 +51,7 @@ const sendMedia = async (chatRoom: IChatRoom) => {
         }
     });
     if (!!media) {
+        let file = readFileSync(media[0].fsPath);
         ChatSocket.socketEmit("send media message", ChatRoomPanel.getChatRoomId(chatRoom), file);
     }
 };
