@@ -1,16 +1,18 @@
-import { VSCodeButton, } from "@vscode/webview-ui-toolkit/react";
+import { VSCodeButton, VSCodeTextField} from "@vscode/webview-ui-toolkit/react";
 import { useState, useEffect, useRef } from "react";
 import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 
 enum BrushType {
     Pen,
-    Eraser
+    Eraser,
+    Text,
 }
 
 function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
     const [isDrawing, setIsDrawing] = useState(false);
     const [brushType, setBrushType] = useState<BrushType>(BrushType.Pen);
+    const [textInput, setTextInput] = useState("");
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -39,11 +41,18 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
     const startDrawing = ({ nativeEvent }: { nativeEvent: any }) => {
         const { offsetX, offsetY } = nativeEvent;
         if (contextRef.current) {
-          contextRef.current.beginPath();
-          contextRef.current.moveTo(offsetX, offsetY);
-          // allow dot creation
-          contextRef.current.lineTo(offsetX, offsetY);
-          contextRef.current.stroke();
+            if (brushType === BrushType.Text) {
+                contextRef.current.font = "30px Arial";
+                contextRef.current.fillStyle = "white";
+                contextRef.current.fillText(textInput, offsetX, offsetY);
+                return;
+            } else {
+                contextRef.current.beginPath();
+                contextRef.current.moveTo(offsetX, offsetY);
+                // allow dot creation
+                contextRef.current.lineTo(offsetX, offsetY);
+                contextRef.current.stroke();
+            }
         }
         setIsDrawing(true);
       };
@@ -91,6 +100,10 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         }
     };
 
+    const writeText = () => {
+        setBrushType(BrushType.Text);
+    };
+
     return (
         <main>
             <canvas
@@ -102,11 +115,17 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
             ></canvas>
             <div className="whiteboardToolbar">
                 <VSCodeButton appearance={brushType === BrushType.Pen ? "primary" : "secondary"} onClick={getBrush}>🖊️</VSCodeButton>
-                <VSCodeButton appearance="secondary">🔤</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Text ? "primary" : "secondary"} onClick={writeText}>🔤</VSCodeButton>
                 <VSCodeButton appearance="secondary">🔺</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Eraser ? "primary" : "secondary"} onClick={getEraser}>🧽</VSCodeButton>
                 <VSCodeButton appearance="secondary" onClick={clearCanvas}>🗑️</VSCodeButton>
             </div>
+            {brushType === BrushType.Text && (
+                <VSCodeTextField className="whiteboardTextInput" value={textInput} onInput={e => {
+                const target = e.target as HTMLInputElement;
+                setTextInput(target.value);
+                }}/>
+            )}
         </main>
     );
 }
