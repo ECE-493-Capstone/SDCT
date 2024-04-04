@@ -114,6 +114,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			groupId: chat.groupId
 		};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
+		backendSocket.getSocket().emit("join chat", ChatRoomPanel.getChatRoomId(chatRoom));
 	});
 
 	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoom: IChatRoom) => {
@@ -124,7 +125,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		const chatRooms = [...chatListProvider.getCurrentData()];
 		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
 		const chatRoomIndex = chatRooms.findIndex(chat => {
-			const chatId = chat.groupId ? chat.groupId : chat.name;
+			const chatId = chat.groupId ? chat.groupId : chat.friendId;
 			return chatId === chatRoomId;
 		});
 		// Validate only one voicechat at a time
@@ -164,8 +165,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (roomId: string, message: IMessage) => {
-		backendSocket.getSocket().emit("send chat message", roomId, message);
+	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (chatRoom: IChatRoom, message: IMessage) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "chat", message});
 	});
 
 	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, media: vscode.Uri[]) => {
