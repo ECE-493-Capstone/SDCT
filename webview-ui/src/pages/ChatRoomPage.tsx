@@ -6,6 +6,7 @@ import { vscode } from "../utilities/vscode";
 import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 import { EMessageType } from "../../../src/enums/EMessageType";
+import { IUser } from "../../../src/interfaces/IUser";
 
 function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [messageInput, _setMessage] = useState("");
@@ -30,7 +31,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           const newMessage = {
             content: message.message.content, 
             timestamp: new Date(), 
-            sender: chatRoom.user,
+            sender: message.chatRoom.user as IUser,
             type: EMessageType.Text
           };
 
@@ -44,7 +45,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           const mediaMessage = {
             content: media.path, // change with URL of media in server
             timestamp: new Date(),
-            sender: chatRoom.user,
+            sender: message.chatRoom.user,
             type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
           };
           handleNewMessage(mediaMessage);
@@ -55,7 +56,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           const fileMessage = {
             content: file.path, // change with URL of file in server
             timestamp: new Date(),
-            sender: chatRoom.user,
+            sender: message.chatRoom.user,
             type: EMessageType.File
           };
           handleNewMessage(fileMessage);
@@ -66,7 +67,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           const codeMessage = {
             content: content,
             timestamp: new Date(),
-            sender: chatRoom.user,
+            sender: message.chatRoom.user,
             type: EMessageType.Code,
             language
           };

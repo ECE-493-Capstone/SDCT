@@ -27,6 +27,11 @@ export class ChatSocket{
             ChatSocket.socket.on("get chat message", (chatRoom, message) => {
                 vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
             });
+
+            ChatSocket.socket.on("get media message", (chatRoom, mediaURL) => {
+                vscode.commands.executeCommand("sdct.sendMedia", chatRoom, mediaURL);
+            });
+
         }else{
             console.log("No socket")
         }
