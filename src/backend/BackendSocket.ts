@@ -56,10 +56,6 @@ export class VoiceSocket{
                 return;
             }
         });
-    
-        this.socket.on("send voice chat", (roomid, data) => {
-            ChatSocket.socketEmit("send voice chat", roomid, data);
-        })
         this.socket.on("get voice chat", (data) => {
             this.io.emit("get voice chat", data);
         });
