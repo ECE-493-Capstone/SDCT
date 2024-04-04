@@ -7,6 +7,10 @@ enum BrushType {
     Pen,
     Eraser,
     Text,
+    Square,
+    Triangle,
+    Diamond,
+    Arrow
 }
 
 function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
@@ -45,6 +49,10 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.font = "30px Arial";
                 contextRef.current.fillStyle = "white";
                 contextRef.current.fillText(textInput, offsetX, offsetY);
+                return;
+            } else if (brushType === BrushType.Square) {
+                contextRef.current.fillStyle = "white";
+                contextRef.current.strokeRect(offsetX, offsetY, 50, 50);
                 return;
             } else {
                 contextRef.current.beginPath();
@@ -104,6 +112,10 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         setBrushType(BrushType.Text);
     };
 
+    const drawSquare = () => {
+        setBrushType(BrushType.Square);
+    };
+
     return (
         <main>
             <canvas
@@ -116,7 +128,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
             <div className="whiteboardToolbar">
                 <VSCodeButton appearance={brushType === BrushType.Pen ? "primary" : "secondary"} onClick={getBrush}>🖊️</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Text ? "primary" : "secondary"} onClick={writeText}>🔤</VSCodeButton>
-                <VSCodeButton appearance="secondary">🔺</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Square ? "primary" : "secondary"} onClick={drawSquare}>🟦</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Eraser ? "primary" : "secondary"} onClick={getEraser}>🧽</VSCodeButton>
                 <VSCodeButton appearance="secondary" onClick={clearCanvas}>🗑️</VSCodeButton>
             </div>
