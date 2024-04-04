@@ -180,10 +180,16 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel?.webview.postMessage({command: "file", file});
 	});
 
-	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, language: string) => {
+	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
-		panel?.webview.postMessage({command: "code", language});
+		panel?.webview.postMessage({command: "code", message});
 	});
+
+	const handleUserCodeMessageDisposable = vscode.commands.registerCommand("sdct.handleUserCodeMessage", (chatRoom: IChatRoom, language: string) => {
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		panel?.webview.postMessage({command: "user code", language});
+	});
+
 	const muteVoiceChatDisposable = vscode.commands.registerCommand("sdct.muteVoiceChat", () => {
 		console.log("mute");
 		VoiceSocket.muteVoiceChat();
@@ -229,6 +235,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		sendChatMessage,
 		sendMediaDisposable,
 		sendFileDisposable,
+		handleUserCodeMessageDisposable,
 		sendCodeMessageDisposable,
 		muteVoiceChatDisposable,
 		endVoiceChatDisposable

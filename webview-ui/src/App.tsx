@@ -20,6 +20,7 @@ function App() {
           setPage(message.page);
           break;
         case 'initChatRoom':
+          console.log(message.chatRoom)
           setChatRoom(message.chatRoom);
           break;
       };

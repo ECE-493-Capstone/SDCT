@@ -188,6 +188,13 @@ export class ChatRoomPanel {
             commands.executeCommand('sdct.sendChatMessage', chatRoom, newMessage);
             break;
           }
+          case "sendCodeMessage":{
+            let chatRoom: IChatRoom = message.chatRoom;
+            console.log(chatRoom);
+            const newMessage: IMessage = message.message;
+            commands.executeCommand('sdct.sendCodeMessage', chatRoom, newMessage);
+            break;
+          }
         }
       },
       undefined,

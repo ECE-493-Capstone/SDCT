@@ -20,7 +20,6 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     let newMessageHistory = [...messageHistory];
     newMessageHistory.push(message);
     setMessageHistory(newMessageHistory);
-    console.log(newMessageHistory);
   };
 
   useEffect(() => {
@@ -34,8 +33,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
             sender: chatRoom.user,
             type: EMessageType.Text
           };
-      
-          console.log("Here")
+
           handleNewMessage(newMessage);
           setMessage("");
           break;
@@ -62,8 +60,20 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           };
           handleNewMessage(fileMessage);
           break;
-        case 'code':
-          console.log(messageInput);
+        case 'code':{
+          const language = message.language;
+          const content = message.message.content;
+          const codeMessage = {
+            content: content,
+            timestamp: new Date(),
+            sender: chatRoom.user,
+            type: EMessageType.Code,
+            language
+          };
+          handleNewMessage(codeMessage);
+          break;
+        }
+        case 'user code':{
           const language = message.language;
           const codeMessage = {
             content: messageRef.current,
@@ -72,15 +82,21 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
             type: EMessageType.Code,
             language
           };
-          handleNewMessage(codeMessage);
+          console.log(chatRoom);
+          vscode.postMessage({
+            command: 'sendCodeMessage',
+            message: codeMessage,
+            chatRoom: chatRoom
+          });
           setMessage("");
           break;
+        }
       };
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [messageHistory]);
+  }, [messageHistory, chatRoom]);
 
   const handleOpenMenu = () => {
     vscode.postMessage({
