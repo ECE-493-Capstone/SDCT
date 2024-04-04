@@ -63,6 +63,13 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 ref={canvasRef}
                 style={{ border: '2px solid black' }}
             ></canvas>
+            <div className="whiteboardToolbar">
+                <VSCodeButton appearance="secondary">🖊️</VSCodeButton>
+                <VSCodeButton appearance="secondary">🔤</VSCodeButton>
+                <VSCodeButton appearance="secondary">🔺</VSCodeButton>
+                <VSCodeButton appearance="secondary">🧽</VSCodeButton>
+                <VSCodeButton appearance="secondary">🗑️</VSCodeButton>
+            </div>
         </main>
     );
 }
