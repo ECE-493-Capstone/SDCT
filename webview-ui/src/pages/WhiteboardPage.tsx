@@ -54,6 +54,35 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.fillStyle = "white";
                 contextRef.current.strokeRect(offsetX, offsetY, 50, 50);
                 return;
+            } else if (brushType === BrushType.Triangle) {
+                contextRef.current.beginPath();
+                contextRef.current.moveTo(offsetX, offsetY);
+                contextRef.current.lineTo(offsetX + 50, offsetY + 50);
+                contextRef.current.lineTo(offsetX - 50, offsetY + 50);
+                contextRef.current.closePath();
+                contextRef.current.stroke();
+                return;
+            } else if (brushType === BrushType.Diamond) {
+                contextRef.current.beginPath();
+                contextRef.current.moveTo(offsetX, offsetY - 50);
+                contextRef.current.lineTo(offsetX + 50, offsetY);
+                contextRef.current.lineTo(offsetX, offsetY + 50);
+                contextRef.current.lineTo(offsetX - 50, offsetY);
+                contextRef.current.closePath();
+                contextRef.current.stroke();
+                return;
+            } else if (brushType === BrushType.Arrow) {
+                contextRef.current.beginPath();
+                contextRef.current.moveTo(offsetX, offsetY);
+                contextRef.current.lineTo(offsetX + 50, offsetY);
+                contextRef.current.lineTo(offsetX + 50, offsetY + 20);
+                contextRef.current.lineTo(offsetX + 100, offsetY - 15);
+                contextRef.current.lineTo(offsetX + 50, offsetY - 50);
+                contextRef.current.lineTo(offsetX + 50, offsetY - 30);
+                contextRef.current.lineTo(offsetX, offsetY - 30);
+                contextRef.current.closePath();
+                contextRef.current.stroke();
+                return;
             } else {
                 contextRef.current.beginPath();
                 contextRef.current.moveTo(offsetX, offsetY);
@@ -63,7 +92,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
             }
         }
         setIsDrawing(true);
-      };
+    };
     
     const finishDrawing = () => {
         if (contextRef.current) {
@@ -116,6 +145,18 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         setBrushType(BrushType.Square);
     };
 
+    const drawTriangle = () => {
+        setBrushType(BrushType.Triangle);
+    };
+
+    const drawDiamond = () => {
+        setBrushType(BrushType.Diamond);
+    };
+
+    const drawArrow = () => {
+        setBrushType(BrushType.Arrow);
+    };
+
     return (
         <main>
             <canvas
@@ -129,6 +170,9 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 <VSCodeButton appearance={brushType === BrushType.Pen ? "primary" : "secondary"} onClick={getBrush}>🖊️</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Text ? "primary" : "secondary"} onClick={writeText}>🔤</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Square ? "primary" : "secondary"} onClick={drawSquare}>🟦</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Triangle ? "primary" : "secondary"} onClick={drawTriangle}>🔺</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Diamond ? "primary" : "secondary"} onClick={drawDiamond}>🔶</VSCodeButton>
+                <VSCodeButton appearance={brushType === BrushType.Arrow ? "primary" : "secondary"} onClick={drawArrow}>⬆️</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Eraser ? "primary" : "secondary"} onClick={getEraser}>🧽</VSCodeButton>
                 <VSCodeButton appearance="secondary" onClick={clearCanvas}>🗑️</VSCodeButton>
             </div>
