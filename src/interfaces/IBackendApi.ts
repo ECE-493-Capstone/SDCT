@@ -23,3 +23,15 @@ export interface IApiGroupChatList{
     MessageText: string,
     MessageLoc: string
 }
+
+export interface IApiFriend{
+    ImageURL: string,
+    rowid: number,
+    FriendId: string,
+    UserId: string
+}
+
+export interface IApiGroup{
+    GroupId: number,
+    GroupName: string,
+}

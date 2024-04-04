@@ -2,9 +2,9 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } 
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
-import { IUser } from "../interfaces/IUser";
 import { EPage } from "../enums/EPage";
 import { IMessage } from "../interfaces/IMessage";
+import { ChatSocket } from "../backend/BackendSocket";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
@@ -25,15 +25,20 @@ export class ChatRoomPanel {
   }
 
   public static getChatRoomId(chatRoom: IChatRoom): string {
-    return chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    if(chatRoom.groupId){
+      return chatRoom.groupId;
+    } else if(chatRoom.friendId){
+      return chatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
+    }
   }
 
   public static getChatRoomName(chatRoom: IChatRoom): string {
-    if (chatRoom.groupId) {
-      const groupName = chatRoom.groupId; // FETCH ACTUAL GROUP NAME
-      return groupName;
-    } else {
-      return chatRoom.friends[0].name;
+    if(chatRoom.name){
+      return chatRoom.name;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
     }
   }
 
@@ -172,12 +177,25 @@ export class ChatRoomPanel {
         const command = message.command;
 
         switch (command) {
-          case "openChatRoomMenu":
-            const chatRoom: IChatRoom = message.chatRoom;
+          case "openChatRoomMenu":{
+            let chatRoom: IChatRoom = message.chatRoom;
             commands.executeCommand('sdct.openChatRoomMenu', chatRoom);
-          case "sendChatMessage":
+            break;
+          }
+          case "sendChatMessage":{
+            let chatRoom: IChatRoom = message.chatRoom;
             const newMessage: IMessage = message.message;
-            commands.executeCommand('sdct.sendChatMessage', message.roomid, newMessage);
+            ChatSocket.socketEmit("send chat message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
+            commands.executeCommand('sdct.sendChatMessage', chatRoom, newMessage);
+            break;
+          }
+          case "sendCodeMessage":{
+            let chatRoom: IChatRoom = message.chatRoom;
+            console.log(chatRoom);
+            const newMessage: IMessage = message.message;
+            commands.executeCommand('sdct.sendCodeMessage', chatRoom, newMessage);
+            break;
+          }
         }
       },
       undefined,

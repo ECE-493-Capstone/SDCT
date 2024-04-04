@@ -7,19 +7,36 @@ import { IChatRoom } from "../../../src/interfaces/IChatRoom";
 import { IMessage } from "../../../src/interfaces/IMessage";
 import { EMessageType } from "../../../src/enums/EMessageType";
 
-function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], handleNewMessage: (message: IMessage) => void}) {
-  const [message, _setMessage] = useState("");
-  const chatRoomRef = useRef(props.chatRoom);
-  const messageRef = useRef(message);
+function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
+  const [messageInput, _setMessage] = useState("");
+  const messageRef = useRef(messageInput);
   const setMessage = (data: string) => {
     messageRef.current = data;
     _setMessage(data);
   };
+  const [messageHistory, setMessageHistory] = useState<IMessage[]>([]);
+
+  const handleNewMessage = (message: IMessage) => {
+    let newMessageHistory = [...messageHistory];
+    newMessageHistory.push(message);
+    setMessageHistory(newMessageHistory);
+  };
 
   useEffect(() => {
-    window.addEventListener('message', event => {
+    function handleMessage(event: any) {
       const message = event.data;
       switch (message.command) {
+        case 'chat':
+          const newMessage = {
+            content: message.message.content, 
+            timestamp: new Date(), 
+            sender: chatRoom.user,
+            type: EMessageType.Text
+          };
+
+          handleNewMessage(newMessage);
+          setMessage("");
+          break;
         case 'media':
           const media = message.media[0];
           // send media
@@ -27,75 +44,80 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
           const mediaMessage = {
             content: media.path, // change with URL of media in server
             timestamp: new Date(),
-            sender: chatRoomRef.current.user,
+            sender: chatRoom.user,
             type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
           };
-          props.handleNewMessage(mediaMessage);
-          vscode.postMessage({
-            command: 'sendChatMessage',
-            message: mediaMessage,
-            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
-          });
+          handleNewMessage(mediaMessage);
+          break;
         case 'file':
           const file = message.file[0];
           // send file
           const fileMessage = {
             content: file.path, // change with URL of file in server
             timestamp: new Date(),
-            sender: chatRoomRef.current.user,
+            sender: chatRoom.user,
             type: EMessageType.File
           };
-          props.handleNewMessage(fileMessage);
-          vscode.postMessage({
-            command: 'sendChatMessage',
-            message: fileMessage,
-            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
-          });
-        case 'code':
+          handleNewMessage(fileMessage);
+          break;
+        case 'code':{
+          const language = message.language;
+          const content = message.message.content;
+          const codeMessage = {
+            content: content,
+            timestamp: new Date(),
+            sender: chatRoom.user,
+            type: EMessageType.Code,
+            language
+          };
+          handleNewMessage(codeMessage);
+          break;
+        }
+        case 'user code':{
           const language = message.language;
           const codeMessage = {
             content: messageRef.current,
             timestamp: new Date(),
-            sender: chatRoomRef.current.user,
+            sender: chatRoom.user,
             type: EMessageType.Code,
             language
           };
-          props.handleNewMessage(codeMessage);
+          console.log(chatRoom);
           vscode.postMessage({
-            command: 'sendChatMessage',
+            command: 'sendCodeMessage',
             message: codeMessage,
-            roomid: chatRoomRef.current.groupId ? chatRoomRef.current.groupId : chatRoomRef.current.friendId
+            chatRoom: chatRoom
           });
           setMessage("");
+          break;
+        }
       };
-    });
-  }, []);
+    };
 
-  useEffect(() => {
-    chatRoomRef.current = props.chatRoom;
-  }, [props.chatRoom]);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [messageHistory, chatRoom]);
 
   const handleOpenMenu = () => {
     vscode.postMessage({
       command: 'openChatRoomMenu',
-      chatRoom: props.chatRoom,
+      chatRoom: chatRoom,
     });
   };
 
-  const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleTextMessage = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newMessage = {
-      content: message, 
+      content: messageInput, 
       timestamp: new Date(), 
-      sender: props.chatRoom.user,
+      sender: chatRoom.user,
       type: EMessageType.Text
     };
 
-    props.handleNewMessage(newMessage);
     vscode.postMessage({
       command: 'sendChatMessage',
       message: newMessage,
-      roomid: props.chatRoom.groupId ? props.chatRoom.groupId : props.chatRoom.friendId
+      chatRoom: chatRoom
       });
     setMessage("");
   };
@@ -112,9 +134,9 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
   return (
     <main>
       <div className="chatContent">
-        {props.messageHistory.map((message, index) => (
-          <div key={index} style={{ textAlign: message.sender !== props.chatRoom.user ? 'left' : 'right' }}>
-            {message.sender !== props.chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+        {messageHistory.map((message, index) => (
+          <div key={index} style={{ textAlign: message.sender !== chatRoom.user ? 'left' : 'right' }}>
+            {message.sender !== chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
             {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
             {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
             {message.type === EMessageType.MediaVideo ? 
@@ -128,13 +150,13 @@ function ChatRoomPage(props: {chatRoom: IChatRoom, messageHistory: IMessage[], h
                 {message.content}
               </SyntaxHighlighter> : null}
             {!!message.content && <span>{getTimeFormatted(message.timestamp)}</span>}
-            {message.sender === props.chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+            {message.sender === chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
           </div>
         ))}
       </div>
       <VSCodeButton className="menuButton" appearance="secondary" onClick={handleOpenMenu}>+</VSCodeButton>
-      <form className="chatForm" onSubmit={handleSendMessage}>
-        <VSCodeTextField className="chatInput" value={message} onInput={e => {
+      <form className="chatForm" onSubmit={handleTextMessage}>
+        <VSCodeTextField className="chatInput" value={messageInput} onInput={e => {
           const target = e.target as HTMLInputElement;
           setMessage(target.value);
         }}/>

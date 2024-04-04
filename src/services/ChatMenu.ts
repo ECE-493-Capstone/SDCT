@@ -24,7 +24,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         } else if (chosenOption === "Send File") {
             await sendFile(chatRoom);
         } else if (chosenOption === "Send Code Message") {
-            await sendCodeMessage(chatRoom);
+            await handleUserCodeMessage(chatRoom);
         } else if (chosenOption === "Leave Group") {
             return;
         } else if (chosenOption === "Join Voice Chat") {
@@ -66,10 +66,10 @@ const sendFile = async (chatRoom: IChatRoom) => {
     }
 };
 
-const sendCodeMessage = async (chatRoom: IChatRoom) => {
+const handleUserCodeMessage = async (chatRoom: IChatRoom) => {
     const languages = ["javascript", "python", "java", "c", "c++", "c#", "typescript", "php", "ruby", "swift", "go", "rust", "kotlin", "scala", "r", "shell", "html", "css"];
     const language = await vscode.window.showQuickPick(languages);
-    vscode.commands.executeCommand("sdct.sendCodeMessage", chatRoom, language);
+    vscode.commands.executeCommand("sdct.handleUserCodeMessage", chatRoom, language);
 };
 
 const joinVoiceChat = (chatRoom: IChatRoom) => {

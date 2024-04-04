@@ -109,6 +109,7 @@
   },
   "scripts": {
     "install:all": "npm install && cd webview-ui && npm install",
+    "install:python": "cd src/python && python3 -m pip install -U -r requirements.txt",
     "start:webview": "cd webview-ui && npm run start",
     "build:webview": "cd webview-ui && npm run build",
     "vscode:prepublish": "npm run compile",
@@ -131,6 +132,7 @@
   },
   "dependencies": {
     "@octokit/rest": "^20.0.2",
+    "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5"
   }
 }
