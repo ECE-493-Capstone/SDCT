@@ -4,59 +4,71 @@ import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { IUser } from "../interfaces/IUser";
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
+import * as vscode from "vscode"
 
-export class BackendSocket{
-    private socket: Socket = io();
+export class ChatSocket{
+    private static socket: Socket | undefined;
 
     constructor(socketUrl: string, socketPort: number){
-        this.socket = io(`${socketUrl}:${socketPort}`, { autoConnect: false });
+        ChatSocket.socket = io(`${socketUrl}:${socketPort}/chat`, { autoConnect: false });
     }
 
-    startSocketIO(username: string){
-        this.socket.auth = { username };
-        this.socket.connect();
-        
-        this.socket.on("connect_error", (err) => {
-            if (err.message === "invalid username") {
-              console.log("Bad SocketIo Connection");
-              return;
-            }
-        });
+    startSocketIO(){
+        if(ChatSocket.socket){
+            ChatSocket.socket.connect();
+            
+            ChatSocket.socket.on("connect_error", (err) => {
+                if (err.message === "invalid username") {
+                    console.log("Bad SocketIo Connection");
+                    return;
+                }
+            });
 
-        this.socket.on("get chat message", (chatRoomId, message) => {
-            ChatRoomPanel.sendChatMessage(chatRoomId, message);
-        });
+            ChatSocket.socket.on("get chat message", (chatRoom, message) => {
+                vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
+            });
+        }else{
+            console.log("No socket")
+        }
 
-        this.socket.on("join private voice", (roomid) => {
-            this.socket.emit("join private voice", roomid)
-        })
-      
-        this.socket.on("send voice chat", (roomid, data) => {
-            this.socket.emit("send voice chat", roomid, data)
-        })
-        this.socket.on("get voice chat", (data) => {
-            VoiceSocket.sendVoiceChat(data)
-        });
     }
 
-    getSocket(): Socket {
-        return this.socket;
+    static socketEmit(command: string, ...args: any[]){
+        if(ChatSocket.socket){
+            ChatSocket.socket.emit(command, ...args)
+        } else{
+            console.log("No socket")
+        }
     }
-    
 }
 
 export class VoiceSocket{
     private httpServer: httpServer;
-    private static io: Server;
-    private backendSocket: BackendSocket;
+    private io: Server;
+    private socket: Socket
 
-    constructor(backendSocket: BackendSocket){
-        this.backendSocket = backendSocket;
+    constructor(socketUrl: string, socketPort: number){
+        this.socket = io(`${socketUrl}:${socketPort}/voice`, { autoConnect: false });
+
+        this.socket.on("connect_error", (err) => {
+            if (err.message === "invalid username") {
+                console.log("Bad SocketIo Connection");
+                return;
+            }
+        });
+    
+        this.socket.on("send voice chat", (roomid, data) => {
+            ChatSocket.socketEmit("send voice chat", roomid, data);
+        })
+        this.socket.on("get voice chat", (data) => {
+            this.io.emit("get voice chat", data);
+        });
+
         this.httpServer = createServer();
-        VoiceSocket.io = new Server(this.httpServer, {});
-        VoiceSocket.io.on("connection", (socket) => {
+        this.io = new Server(this.httpServer, {});
+        this.io.on("connection", (socket) => {
             socket.on("send voice chat", (roomid, data) => {
-                backendSocket.getSocket().emit("send voice chat", roomid, data)
+                this.socket.emit("send voice chat", roomid, data)
             })
             socket.on("disconnect", () => {
                 console.log("Disconnected");
@@ -64,19 +76,20 @@ export class VoiceSocket{
           });
     }
 
+    
     startVoiceChat(roomid: string){
+        this.socket.connect();
+
         this.httpServer.listen(0);
-        this.backendSocket.getSocket().emit("join private voice", roomid)
+        this.socket.emit("join private voice", roomid)
     }
     
-    static sendVoiceChat(data: any){
-        VoiceSocket.io.emit("get voice chat", data);
+    muteVoiceChat(){
+        this.io.emit("mute voice chat");
     }
-    static muteVoiceChat(){
-        VoiceSocket.io.emit("mute voice chat");
-    }
-    static endVoiceChat(){
-        VoiceSocket.io.close();
+    endVoiceChat(){
+        this.socket.close();
+        this.io.close();
         console.log("Closed");
     }
 

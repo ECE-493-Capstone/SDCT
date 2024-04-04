@@ -2,9 +2,9 @@ import { Disposable, Webview, WebviewPanel, window, Uri, ViewColumn, commands } 
 import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
-import { IUser } from "../interfaces/IUser";
 import { EPage } from "../enums/EPage";
 import { IMessage } from "../interfaces/IMessage";
+import { ChatSocket } from "../backend/BackendSocket";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
@@ -185,6 +185,7 @@ export class ChatRoomPanel {
           case "sendChatMessage":{
             let chatRoom: IChatRoom = message.chatRoom;
             const newMessage: IMessage = message.message;
+            ChatSocket.socketEmit("send chat message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
             commands.executeCommand('sdct.sendChatMessage', chatRoom, newMessage);
             break;
           }

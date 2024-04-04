@@ -13,7 +13,7 @@ import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
 import { BackendAPI } from './backend/BackendAPI';
-import { BackendSocket, VoiceSocket } from './backend/BackendSocket'
+import { ChatSocket, VoiceSocket } from './backend/BackendSocket'
 import { IMessage } from './interfaces/IMessage';
 import { IFriend } from "./interfaces/IFriend"
 import { spawn, ChildProcessWithoutNullStreams} from "child_process"
@@ -21,7 +21,6 @@ import { spawn, ChildProcessWithoutNullStreams} from "child_process"
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
 const SocketPort = 3000;
-const VoicePort = 3001;
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -35,8 +34,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	await credentials.initialize(context);
 	
 	const backendAPI = new BackendAPI(BackendURL, ApiPort);
-	const backendSocket = new BackendSocket(BackendURL, SocketPort);
-	const voiceSocket = new VoiceSocket(backendSocket)
+	const backendSocket = new ChatSocket(BackendURL, SocketPort);
+	const voiceSocket = new VoiceSocket(BackendURL, SocketPort)
 
 	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
@@ -60,7 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
-		backendSocket.startSocketIO(userInfo.data.login);
+		backendSocket.startSocketIO();
 		backendAPI.login(userAuth).then(async (success) =>{
 			if(success){
 				context.globalState.update('userAuth', userAuth);
@@ -114,7 +113,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			groupId: chat.groupId
 		};
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
-		backendSocket.getSocket().emit("join chat", ChatRoomPanel.getChatRoomId(chatRoom));
+		ChatSocket.socketEmit("join chat", ChatRoomPanel.getChatRoomId(chatRoom));
 	});
 
 	const openChatRoomMenuDisposable = vscode.commands.registerCommand("sdct.openChatRoomMenu", (chatRoom: IChatRoom) => {
@@ -137,6 +136,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		chatRooms[chatRoomIndex].voiceChatActive = true;
 		chatListProvider.setData(chatRooms);
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
+
 		voiceSocket.startVoiceChat(chatRoomId);
 
 		voiceSession = spawn('python3',["src/python/audio_socketio.py", voiceSocket.getSocketInfo(), chatRoomId], {cwd: context.extensionPath});
@@ -165,7 +165,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
-	const sendChatMessage = vscode.commands.registerCommand("sdct.sendChatMessage", (chatRoom: IChatRoom, message: IMessage) => {
+	const sendChatMessageDisposable = vscode.commands.registerCommand("sdct.sendChatMessage", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "chat", message});
 	});
@@ -192,12 +192,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const muteVoiceChatDisposable = vscode.commands.registerCommand("sdct.muteVoiceChat", () => {
 		console.log("mute");
-		VoiceSocket.muteVoiceChat();
+		voiceSocket.muteVoiceChat();
 	});
 
 	const endVoiceChatDisposable = vscode.commands.registerCommand("sdct.endVoiceChat", () => {
 		console.log("kill");
-		VoiceSocket.endVoiceChat();
+		voiceSocket.endVoiceChat();
 		voiceSession.kill();
 	});
 
@@ -206,7 +206,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: "MOCKUSER",
 			pictureUri: "adada"
 		};
-		backendSocket.startSocketIO("MOCKUSER");
+		backendSocket.startSocketIO();
 		backendAPI.login(userAuth).then(async (success) => {
 			if(success){
 				context.globalState.update('userAuth', userAuth);
@@ -232,7 +232,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
 		openCodeSessionDisposable,
-		sendChatMessage,
+		sendChatMessageDisposable,
 		sendMediaDisposable,
 		sendFileDisposable,
 		handleUserCodeMessageDisposable,
