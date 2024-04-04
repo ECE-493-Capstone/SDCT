@@ -4,6 +4,7 @@ import "./App.css";
 import ChatRoomPage from "./pages/ChatRoomPage";
 import VoiceChatPage from "./pages/VoiceChatPage";
 import CodeSessionPage from "./pages/CodeSessionPage";
+import WhiteboardPage from "./pages/WhiteboardPage";
 import { IChatRoom } from "../../src/interfaces/IChatRoom";
 
 const defaultChatRoom: IChatRoom = {name: "", user: {name: "", pictureUri: ""}, friends: [], joinedCodeSession: false, joinedVoiceChat: false};
@@ -35,6 +36,7 @@ function App() {
       {page === EPage.ChatRoom && <ChatRoomPage chatRoom={chatRoom}/>}
       {page === EPage.VoiceChat && <VoiceChatPage chatRoom={chatRoom}/>}
       {page === EPage.CodeSession && <CodeSessionPage chatRoom={chatRoom}/>}
+      {page === EPage.Whiteboard && <WhiteboardPage chatRoom={chatRoom}/>}
     </main>
   );
 }
