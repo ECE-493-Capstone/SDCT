@@ -17,6 +17,7 @@ import { ChatSocket, VoiceSocket } from './backend/BackendSocket'
 import { IMessage } from './interfaces/IMessage';
 import { IFriend } from "./interfaces/IFriend"
 import { spawn, ChildProcessWithoutNullStreams} from "child_process"
+import { WhiteboardPanel } from './panels/WhiteboardPanel';
 
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
@@ -160,9 +161,13 @@ export async function activate(context: vscode.ExtensionContext) {
 			const chatId = chat.groupId ? chat.groupId : chat.name;
 			return chatId === chatRoomId;
 		});
-		chatRooms[chatRoomIndex].codeSessionActive = true;
+		// chatRooms[chatRoomIndex].codeSessionActive = true; // DEBUG
 		chatListProvider.setData(chatRooms);
 		CodeSessionPanel.render(context.extensionUri, chatRoom);
+	});
+
+	const openWhiteboardDisposable = vscode.commands.registerCommand("sdct.openWhiteboard", (chatRoom: IChatRoom) => {
+		WhiteboardPanel.render(context.extensionUri, chatRoom);
 	});
 
 	const sendChatMessageDisposable = vscode.commands.registerCommand("sdct.sendChatMessage", (chatRoom: IChatRoom, message: IMessage) => {

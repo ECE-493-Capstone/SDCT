@@ -63,6 +63,10 @@
       {
         "command": "sdct.sendCodeMessage",
         "title": "SDCT: Send Code Message"
+      },
+      {
+        "command": "sdct.openWhiteboard",
+        "title": "SDCT: Open Whiteboard"
       }
     ],
     "viewsContainers": {

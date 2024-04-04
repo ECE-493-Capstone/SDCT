@@ -8,7 +8,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
   const [isHost, setIsHost] = useState(false); // fetch value from server
 
   const handleWhiteboard = () => {
-    
+    vscode.postMessage({command: 'openWhiteboard', chatRoom});
   };
 
   const handleReadOnly= () => {

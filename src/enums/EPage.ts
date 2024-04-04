@@ -1,5 +1,6 @@
 export enum EPage {
     ChatRoom = 'ChatRoom',
     VoiceChat = 'VoiceChat',
-    CodeSession = 'CodeSession'
+    CodeSession = 'CodeSession',
+    Whiteboard = 'Whiteboard',
 }

@@ -4,8 +4,8 @@ import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
 import { EPage } from "../enums/EPage";
 
-export class CodeSessionPanel {
-  public static currentPanels: Map<string, CodeSessionPanel> = new Map();
+export class WhiteboardPanel {
+  public static currentPanels: Map<string, WhiteboardPanel> = new Map();
   private readonly _panel: WebviewPanel;
   private _disposables: Disposable[] = [];
   private _id: string = "";
@@ -14,9 +14,9 @@ export class CodeSessionPanel {
     return this._panel;
   }
 
-  public static getCodeSessionName(chatRoom: IChatRoom): string {
+  public static getWhiteboardName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
-      const groupName = `CS: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
+      const groupName = `W: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
       return groupName;
     } else {
       return chatRoom.friends[0].name;
@@ -24,7 +24,7 @@ export class CodeSessionPanel {
   }
 
   /**
-   * The CodeSessionPanel class private constructor (called only from the render method).
+   * The WhiteboardPanel class private constructor (called only from the render method).
    *
    * @param panel A reference to the webview panel
    * @param extensionUri The URI of the directory containing the extension
@@ -52,9 +52,9 @@ export class CodeSessionPanel {
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
     const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
-    if (CodeSessionPanel.currentPanels.has(chatRoomId)) {
+    if (WhiteboardPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
-      const panel = CodeSessionPanel.currentPanels.get(chatRoomId);
+      const panel = WhiteboardPanel.currentPanels.get(chatRoomId);
       if (!!panel) {
         panel._panel.reveal(ViewColumn.One);
       }
@@ -62,9 +62,9 @@ export class CodeSessionPanel {
       // If a webview panel does not already exist create and show a new one
       const panel = window.createWebviewPanel(
         // Panel view type
-        "showCodeSession",
+        "showWhiteboard",
         // Panel title
-        this.getCodeSessionName(chatRoom),
+        this.getWhiteboardName(chatRoom),
         // The editor column the panel should be displayed in
         ViewColumn.One,
         // Extra panel configurations
@@ -77,8 +77,8 @@ export class CodeSessionPanel {
         }
       );
 
-      CodeSessionPanel.currentPanels.set(chatRoomId, new CodeSessionPanel(panel, extensionUri, chatRoomId));
-      panel.webview.postMessage({ command: "route", page: EPage.CodeSession});
+      WhiteboardPanel.currentPanels.set(chatRoomId, new WhiteboardPanel(panel, extensionUri, chatRoomId));
+      panel.webview.postMessage({ command: "route", page: EPage.Whiteboard});
       panel.webview.postMessage({ command: "initChatRoom", chatRoom });
     }
   }
@@ -87,7 +87,7 @@ export class CodeSessionPanel {
    * Cleans up and disposes of webview resources when the webview panel is closed.
    */
   public dispose() {
-    CodeSessionPanel.currentPanels.delete(this._id);
+    WhiteboardPanel.currentPanels.delete(this._id);
 
     // Dispose of the current webview panel
     this._panel.dispose();
@@ -151,12 +151,6 @@ export class CodeSessionPanel {
         const command = message.command;
 
         switch (command) {
-          case "endCodeSession":
-            this.dispose();
-            break;
-          case "openWhiteboard":
-            commands.executeCommand("sdct.openWhiteboard", message.chatRoom);
-            break;
         }
       },
       undefined,
