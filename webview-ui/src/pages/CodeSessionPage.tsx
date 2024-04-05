@@ -19,6 +19,19 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
     vscode.postMessage({command: 'endCodeSession'});
   };
 
+  useEffect(() => {
+    function handleMessage(event: any) {
+        const message = event.data;
+        switch (message.command) {
+          case 'host':
+            setIsHost(true)
+            break;
+      };
+    }
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [isHost]);
+
   return (
     <main>
       <img src={chatRoom?.user.pictureUri} width="100" />

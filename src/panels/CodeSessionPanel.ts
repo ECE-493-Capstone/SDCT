@@ -14,6 +14,14 @@ export class CodeSessionPanel {
   public getPanel(): WebviewPanel {
     return this._panel;
   }
+  public static getPanel(chatRoomId: string): WebviewPanel | undefined {
+    const panel = CodeSessionPanel.currentPanels.get(chatRoomId);
+    if (!!panel) {
+      return panel._panel;
+    }
+    return undefined;
+  }
+
 
   public static getCodeSessionRoomId(chatRoom: IChatRoom): string {
     if(chatRoom.groupId){
@@ -61,7 +69,7 @@ export class CodeSessionPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    const chatRoomId = CodeSessionPanel.getCodeSessionRoomId(chatRoom);
     if (CodeSessionPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
       const panel = CodeSessionPanel.currentPanels.get(chatRoomId);
