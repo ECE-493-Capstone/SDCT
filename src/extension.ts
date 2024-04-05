@@ -13,12 +13,13 @@ import { IChatRoom } from './interfaces/IChatRoom';
 import { chatMenu } from './services/ChatMenu';
 import { IChat } from './interfaces/IChat';
 import { BackendAPI } from './backend/BackendAPI';
-import { ChatSocket, VoiceSocket } from './backend/BackendSocket'
+import { ChatSocket, CodeSocket, VoiceSocket } from './backend/BackendSocket'
 import { IMessage } from './interfaces/IMessage';
 import { IFriend } from "./interfaces/IFriend"
 import { spawn, ChildProcessWithoutNullStreams} from "child_process"
 import { WhiteboardPanel } from './panels/WhiteboardPanel';
 import { EMessageType }from './enums/EMessageType'
+import { CodeSession } from './services/CodeSession'
 
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
@@ -38,7 +39,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	const backendAPI = new BackendAPI(BackendURL, ApiPort);
 	const backendSocket = new ChatSocket(BackendURL, SocketPort);
 	const voiceSocket = new VoiceSocket(BackendURL, SocketPort)
+	const codeSocket = new CodeSocket(BackendURL, SocketPort);
 
+	const codeSession = new CodeSession(context);
+	
+	
 	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
@@ -174,16 +179,40 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	});
 
-	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
-		const chatRooms = [...chatListProvider.getCurrentData()];
-		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
-		const chatRoomIndex = chatRooms.findIndex(chat => {
-			const chatId = chat.groupId ? chat.groupId : chat.name;
-			return chatId === chatRoomId;
-		});
-		// chatRooms[chatRoomIndex].codeSessionActive = true; // DEBUG
-		chatListProvider.setData(chatRooms);
-		CodeSessionPanel.render(context.extensionUri, chatRoom);
+	const startCodeSessionDisposable = vscode.commands.registerCommand("sdct.startCodeSession", async (chatRoom: IChatRoom) => {
+		codeSocket.startSocketIO();
+		if(await codeSession.startSession(chatRoom)){
+			const chatRooms = [...chatListProvider.getCurrentData()];
+			const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+			const chatRoomIndex = chatRooms.findIndex(chat => {
+				const chatId = chat.groupId ? chat.groupId : chat.friendId;
+				return chatId === chatRoomId;
+			});
+			
+			chatRooms[chatRoomIndex].codeSessionActive = true;
+			chatListProvider.setData(chatRooms);
+			CodeSessionPanel.render(context.extensionUri, chatRoom);
+		} else{
+			console.log("Failed to start codesession")
+		}
+	});
+
+	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.joinCodeSession", async (chatRoom: IChatRoom) => {
+		codeSocket.startSocketIO();
+		if(await codeSession.joinSession(chatRoom)){
+			const chatRooms = [...chatListProvider.getCurrentData()];
+			const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+			const chatRoomIndex = chatRooms.findIndex(chat => {
+				const chatId = chat.groupId ? chat.groupId : chat.friendId;
+				return chatId === chatRoomId;
+			});
+			
+			chatRooms[chatRoomIndex].codeSessionActive = true;
+			chatListProvider.setData(chatRooms);
+			CodeSessionPanel.render(context.extensionUri, chatRoom);
+		} else{
+			console.log("Failed to start codesession")
+		}
 	});
 
 	const openWhiteboardDisposable = vscode.commands.registerCommand("sdct.openWhiteboard", (chatRoom: IChatRoom) => {
@@ -256,6 +285,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
+		startCodeSessionDisposable,
 		openCodeSessionDisposable,
 		sendChatMessageDisposable,
 		sendMediaDisposable,

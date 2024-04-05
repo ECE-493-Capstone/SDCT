@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { IChatRoom } from '../interfaces/IChatRoom';
-import { ChatSocket } from '../backend/BackendSocket';
+import { ChatSocket, CodeSocket } from '../backend/BackendSocket';
 import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { readFileSync } from 'fs';
 import {EMessageType} from '../enums/EMessageType'
 import path from 'path'
 import { IMessage } from '../interfaces/IMessage';
+import { CodeSessionPanel } from '../panels/CodeSessionPanel';
 
 export async function chatMenu(chatRoom: IChatRoom) {
     const options = [
@@ -17,12 +18,15 @@ export async function chatMenu(chatRoom: IChatRoom) {
         options.push("Leave Group");
         options.push("See Group Members");
     }
+
     if (!chatRoom.joinedVoiceChat) {
         options.push("Join Voice Chat");
     }
     if (!chatRoom.joinedCodeSession) {
+        options.push("Start Code Session");
         options.push("Join Code Session");
     }
+
     const chosenOption = await vscode.window.showQuickPick(options);
     if (!!chosenOption) {
         if (chosenOption === "Send Media") {
@@ -35,8 +39,10 @@ export async function chatMenu(chatRoom: IChatRoom) {
             return;
         } else if (chosenOption === "Join Voice Chat") {
             joinVoiceChat(chatRoom);
+        } else if (chosenOption === "Start Code Session") {
+            startCodeSession(chatRoom);
         } else if (chosenOption === "Join Code Session") {
-            joinedCodeSession(chatRoom);
+            joinCodeSession(chatRoom);
         } else if (chosenOption === "See Group Members") {
             await showGroupMembers(chatRoom);
         }
@@ -98,9 +104,24 @@ const joinVoiceChat = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.openVoiceChat", chatRoom);
 };
 
-const joinedCodeSession = (chatRoom: IChatRoom) => {
-    vscode.commands.executeCommand("sdct.openCodeSession", chatRoom);
+const startCodeSession = (chatRoom: IChatRoom) => {
+    if(CodeSessionPanel.currentPanels.size >= 1){
+        vscode.window.showErrorMessage("You may only be in 1 code session at a time")
+        return;
+    }
+
+    vscode.commands.executeCommand("sdct.startCodeSession", chatRoom);
 };
+
+const joinCodeSession = (chatRoom: IChatRoom) => {
+    if(CodeSessionPanel.currentPanels.size >= 1){
+        vscode.window.showErrorMessage("You may only be in 1 code session at a time")
+        return;
+    }
+
+    vscode.commands.executeCommand("sdct.joinCodeSession", chatRoom);
+};
+
 
 const showGroupMembers = async (chatRoom: IChatRoom) => {
     vscode.window.showQuickPick(chatRoom.friends.map(friend => friend.name));

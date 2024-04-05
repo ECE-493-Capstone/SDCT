@@ -3,6 +3,7 @@ import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
 import { EPage } from "../enums/EPage";
+import { CodeSession } from "../services/CodeSession";
 
 export class CodeSessionPanel {
   public static currentPanels: Map<string, CodeSessionPanel> = new Map();
@@ -14,12 +15,21 @@ export class CodeSessionPanel {
     return this._panel;
   }
 
+  public static getCodeSessionRoomId(chatRoom: IChatRoom): string {
+    if(chatRoom.groupId){
+      return chatRoom.groupId;
+    } else if(chatRoom.friendId){
+      return chatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
+    }
+  }
+
   public static getCodeSessionName(chatRoom: IChatRoom): string {
-    if (chatRoom.groupId) {
-      const groupName = `CS: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
-      return groupName;
-    } else {
-      return chatRoom.friends[0].name;
+    if(chatRoom.name){
+      return `CodeSession: ${chatRoom.name}`;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
     }
   }
 
@@ -89,6 +99,7 @@ export class CodeSessionPanel {
   public dispose() {
     CodeSessionPanel.currentPanels.delete(this._id);
 
+    CodeSession.endCodeSession();
     // Dispose of the current webview panel
     this._panel.dispose();
 
