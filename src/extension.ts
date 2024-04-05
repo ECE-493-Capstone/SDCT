@@ -175,14 +175,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		panel?.webview.postMessage({command: "chat", message, chatRoom});
 	});
 
-	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, media: string) => {
+	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
-		panel?.webview.postMessage({command: "media", media, chatRoom});
+		panel?.webview.postMessage({command: "media", message, chatRoom});
 	});
 
-	const sendFileDisposable = vscode.commands.registerCommand("sdct.sendFile", (chatRoom: IChatRoom, file: vscode.Uri[]) => {
+	const sendFileDisposable = vscode.commands.registerCommand("sdct.sendFile", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
-		panel?.webview.postMessage({command: "file", file, chatRoom});
+		panel?.webview.postMessage({command: "file", message, chatRoom});
 	});
 
 	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, message: IMessage) => {

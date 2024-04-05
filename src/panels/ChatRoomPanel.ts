@@ -185,14 +185,14 @@ export class ChatRoomPanel {
           case "sendChatMessage":{
             let chatRoom: IChatRoom = message.chatRoom;
             const newMessage: IMessage = message.message;
-            ChatSocket.socketEmit("send chat message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
+            ChatSocket.socketEmit("send message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
             commands.executeCommand('sdct.sendChatMessage', chatRoom, newMessage);
             break;
           }
           case "sendCodeMessage":{
             let chatRoom: IChatRoom = message.chatRoom;
-            console.log(chatRoom);
             const newMessage: IMessage = message.message;
+            ChatSocket.socketEmit("send message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
             commands.executeCommand('sdct.sendCodeMessage', chatRoom, newMessage);
             break;
           }

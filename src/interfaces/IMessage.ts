@@ -7,4 +7,5 @@ export interface IMessage {
     sender: IUser;
     type: EMessageType;
     language?: string;
+    filename?: string;
 }

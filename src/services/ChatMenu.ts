@@ -3,6 +3,9 @@ import { IChatRoom } from '../interfaces/IChatRoom';
 import { ChatSocket } from '../backend/BackendSocket';
 import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { readFileSync } from 'fs';
+import {EMessageType} from '../enums/EMessageType'
+import path from 'path'
+import { IMessage } from '../interfaces/IMessage';
 
 export async function chatMenu(chatRoom: IChatRoom) {
     const options = [
@@ -51,8 +54,15 @@ const sendMedia = async (chatRoom: IChatRoom) => {
         }
     });
     if (!!media) {
-        let file = readFileSync(media[0].fsPath);
-        ChatSocket.socketEmit("send media message", ChatRoomPanel.getChatRoomId(chatRoom), file);
+        let _file = readFileSync(media[0].fsPath);
+        const newMessage = {
+            content: _file,
+            timestamp: new Date(),
+            sender: chatRoom.user,
+            type: EMessageType.Media,
+            filename: path.basename(media[0].fsPath)
+          };
+        ChatSocket.socketEmit("send message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
     }
 };
 
@@ -66,7 +76,15 @@ const sendFile = async (chatRoom: IChatRoom) => {
         }
     });
     if (!!file) {
-        vscode.commands.executeCommand("sdct.sendFile", chatRoom, file);
+        let _file = readFileSync(file[0].fsPath);
+        const newMessage = {
+            content: _file,
+            timestamp: new Date(),
+            sender: chatRoom.user,
+            type: EMessageType.File,
+            filename: path.basename(file[0].fsPath)
+          };
+        ChatSocket.socketEmit("send message", ChatRoomPanel.getChatRoomId(chatRoom), chatRoom, newMessage);
     }
 };
 
