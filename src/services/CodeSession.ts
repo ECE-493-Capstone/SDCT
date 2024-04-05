@@ -73,9 +73,6 @@ export class CodeSession {
       if(CodeSession.filepath){
         await this.extractWorkspace()
         // vscode.workspace.updateWorkspaceFolders(1,null,{uri:vscode.Uri.file(`${this.storagePath}/${workspacename}`)})
-        await vscode.commands.executeCommand(
-          'vscode.openFolder', 
-          vscode.Uri.file(CodeSession.filepath.replace(".tar.gz", "")),{forceReuseWindow: true});
       }
 
     }
@@ -180,7 +177,7 @@ export class CodeSession {
     }
   }
 
-  async joinSession(chatRoom: IChatRoom): Promise<boolean>{
+  async joinSession(context: vscode.ExtensionContext, chatRoom: IChatRoom): Promise<boolean>{
 		CodeSocket.socketEmit("join code session", ChatRoomPanel.getChatRoomId(chatRoom), async (response: any, file: any) => {
         console.log(response);
         if(response === "CodeSession DNE"){
@@ -190,6 +187,11 @@ export class CodeSession {
           CodeSession.filepath = `${this.storagePath}/${file.name}.tar.gz`
           fs.writeFileSync(CodeSession.filepath, file.data, {encoding: null});
           if(await this.loadWorkspace()){
+            context.globalState.update('codeSession', true);
+            context.globalState.update('codeRoom', chatRoom)
+            await vscode.commands.executeCommand(
+              'vscode.openFolder', 
+              vscode.Uri.file(CodeSession.filepath.replace(".tar.gz", "")),{forceReuseWindow: true});
             return true;
           } else{
             CodeSession.endCodeSession();
@@ -202,5 +204,7 @@ export class CodeSession {
       return false;
       //this.startDecorator();
   }
+
+
 }
 

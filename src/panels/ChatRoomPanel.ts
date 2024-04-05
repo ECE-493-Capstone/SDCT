@@ -8,6 +8,7 @@ import { ChatSocket } from "../backend/BackendSocket";
 
 export class ChatRoomPanel {
   public static currentPanels: Map<string, ChatRoomPanel> = new Map();
+  public static currentRooms: Map<string, IChatRoom> = new Map();
   private readonly _panel: WebviewPanel;
   private _disposables: Disposable[] = [];
   private _id: string = "";
@@ -104,6 +105,7 @@ export class ChatRoomPanel {
       );
 
       ChatRoomPanel.currentPanels.set(chatRoomId, new ChatRoomPanel(panel, extensionUri, chatRoomId));
+      ChatRoomPanel.currentRooms.set(chatRoomId, chatRoom);
       panel.webview.postMessage({ command: "route", page: EPage.ChatRoom});
       panel.webview.postMessage({ command: "initChatRoom", chatRoom });
     }

@@ -67,6 +67,9 @@ export class BackendAPI {
     getUser(): string{
         return this.userID;
     }
+    updateUser(user: IUser){
+        this.userID = user.name;
+    }
 
     async getFriends(): Promise<IApiFriend[]>{
         const friends = await this.getRequest(`/get_friends/${this.userID}`);

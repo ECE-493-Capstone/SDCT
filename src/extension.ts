@@ -21,6 +21,7 @@ import { WhiteboardPanel } from './panels/WhiteboardPanel';
 import { EMessageType }from './enums/EMessageType'
 import { CodeSession } from './services/CodeSession'
 
+
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
 const SocketPort = 3000;
@@ -31,8 +32,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "SDCT" is now active!');
-	context.globalState.update('userAuth', undefined);
-
+	
 	const credentials = new Credentials();
 	await credentials.initialize(context);
 	
@@ -43,8 +43,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const codeSession = new CodeSession(context);
 	
-	
-	const chatListProvider = new ChatListProvider(context, backendAPI);
+	let chatdata:IChat[] = [];
+	if(context.globalState.get('codeSession')){
+		console.log(context.globalState.get('codeRoom'));
+		const _chatdata = context.globalState.get<IChatRoom>('codeRoom');
+		console.log(_chatdata);
+		if(_chatdata){
+			vscode.commands.executeCommand('sdct.openCodeSession', _chatdata);
+		}
+	}
+	const chatListProvider = new ChatListProvider(context, backendAPI, chatdata);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
@@ -52,6 +60,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.createTreeView('profile', {
 		treeDataProvider: profileProvider
 	});
+	const user = context.globalState.get<IUser>('userAuth')
+	if(user){
+		backendAPI.updateUser(user)
+		await chatListProvider.refresh(context);
+		profileProvider.refresh(context);
+	}
+
+
 
 	var voiceSession: ChildProcessWithoutNullStreams;
 	// The command has been defined in the package.json file
@@ -182,37 +198,32 @@ export async function activate(context: vscode.ExtensionContext) {
 	const startCodeSessionDisposable = vscode.commands.registerCommand("sdct.startCodeSession", async (chatRoom: IChatRoom) => {
 		codeSocket.startSocketIO();
 		if(await codeSession.startSession(chatRoom)){
-			const chatRooms = [...chatListProvider.getCurrentData()];
-			const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
-			const chatRoomIndex = chatRooms.findIndex(chat => {
-				const chatId = chat.groupId ? chat.groupId : chat.friendId;
-				return chatId === chatRoomId;
-			});
-			
-			chatRooms[chatRoomIndex].codeSessionActive = true;
-			chatListProvider.setData(chatRooms);
-			CodeSessionPanel.render(context.extensionUri, chatRoom);
+			vscode.commands.executeCommand('sdct.openCodeSession', chatRoom);
+			const panel = CodeSessionPanel.getPanel(CodeSessionPanel.getCodeSessionRoomId(chatRoom));
+			panel?.webview.postMessage({command: "host"});
 		} else{
 			console.log("Failed to start codesession")
 		}
 	});
 
-	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.joinCodeSession", async (chatRoom: IChatRoom) => {
+	const joinCodeSessionDisposable = vscode.commands.registerCommand("sdct.joinCodeSession", async (chatRoom: IChatRoom) => {
 		codeSocket.startSocketIO();
-		if(await codeSession.joinSession(chatRoom)){
-			const chatRooms = [...chatListProvider.getCurrentData()];
-			const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
-			const chatRoomIndex = chatRooms.findIndex(chat => {
-				const chatId = chat.groupId ? chat.groupId : chat.friendId;
-				return chatId === chatRoomId;
-			});
-			
-			chatRooms[chatRoomIndex].codeSessionActive = true;
-			chatListProvider.setData(chatRooms);
-			CodeSessionPanel.render(context.extensionUri, chatRoom);
-		} else{
-			console.log("Failed to start codesession")
+		if(!await codeSession.joinSession(context, chatRoom)){
+			console.log("Failed to join codesession")
 		}
+	});
+
+	const openCodeSessionDisposable = vscode.commands.registerCommand("sdct.openCodeSession", (chatRoom: IChatRoom) => {
+		const chatRooms = [...chatListProvider.getCurrentData()];
+		const chatRoomId = ChatRoomPanel.getChatRoomId(chatRoom);
+		const chatRoomIndex = chatRooms.findIndex(chat => {
+			const chatId = chat.groupId ? chat.groupId : chat.friendId;
+			return chatId === chatRoomId;
+		});
+		
+		chatRooms[chatRoomIndex].codeSessionActive = true;
+		chatListProvider.setData(chatRooms);
+		CodeSessionPanel.render(context.extensionUri, chatRoom);
 	});
 
 	const openWhiteboardDisposable = vscode.commands.registerCommand("sdct.openWhiteboard", (chatRoom: IChatRoom) => {
@@ -286,6 +297,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,
 		startCodeSessionDisposable,
+		joinCodeSessionDisposable,
 		openCodeSessionDisposable,
 		sendChatMessageDisposable,
 		sendMediaDisposable,
