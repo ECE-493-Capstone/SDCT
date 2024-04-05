@@ -136,7 +136,9 @@
   },
   "dependencies": {
     "@octokit/rest": "^20.0.2",
+    "@types/tar": "^6.1.12",
     "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "tar": "^6.2.1"
   }
 }
