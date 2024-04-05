@@ -4,7 +4,8 @@ import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { IUser } from "../interfaces/IUser";
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
-import {EMessageType} from '../enums/EMessageType'
+import { EMessageType } from '../enums/EMessageType'
+import { CodeSessionPanel } from "../panels/CodeSessionPanel";
 import * as vscode from "vscode"
 
 export class ChatSocket{
@@ -49,7 +50,7 @@ export class ChatSocket{
 
     }
 
-    static socketEmit(command: string, ...args: any[]){
+    public static socketEmit(command: string, ...args: any[]){
         if(ChatSocket.socket){
             ChatSocket.socket.emit(command, ...args)
         } else{
@@ -109,4 +110,46 @@ export class VoiceSocket{
         const { port } = this.httpServer.address() as AddressInfo
         return `http://[::1]:${port}`;
     }
+}
+
+export class CodeSocket{
+    private static socket: Socket | undefined;
+
+    constructor(socketUrl: string, socketPort: number){
+        CodeSocket.socket = io(`${socketUrl}:${socketPort}/code`, { autoConnect: false });
+    }
+
+    startSocketIO(){
+        if(CodeSocket.socket){
+            CodeSocket.socket.connect();
+            
+            CodeSocket.socket.on("connect_error", (err) => {
+                if (err.message === "invalid username") {
+                    console.log("Bad SocketIo Connection");
+                    return;
+                }
+            });
+
+        }else{
+            console.log("No socket")
+        }
+
+    }
+
+    public static socketEmit(command: string, ...args: any[]){
+        if(CodeSocket.socket){
+            CodeSocket.socket.emit(command, ...args)
+        } else{
+            console.log("No socket")
+        }
+    }
+    public static endCodeSession(){
+        if(CodeSocket.socket){
+            CodeSocket.socket.close();
+            console.log("Closed");
+        } else{
+            console.log("No socket")
+        }
+    }
+
 }
