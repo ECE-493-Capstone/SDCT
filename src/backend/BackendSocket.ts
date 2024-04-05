@@ -4,6 +4,7 @@ import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { IUser } from "../interfaces/IUser";
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
+import {EMessageType} from '../enums/EMessageType'
 import * as vscode from "vscode"
 
 export class ChatSocket{
@@ -24,12 +25,22 @@ export class ChatSocket{
                 }
             });
 
-            ChatSocket.socket.on("get chat message", (chatRoom, message) => {
-                vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
-            });
-
-            ChatSocket.socket.on("get media message", (chatRoom, mediaURL) => {
-                vscode.commands.executeCommand("sdct.sendMedia", chatRoom, mediaURL);
+            ChatSocket.socket.on("get message", (chatRoom, message) => {
+                console.log(message);
+                switch (message.type) {
+                    case EMessageType.Text:
+                        vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
+                        break;
+                    case EMessageType.Media:
+                        vscode.commands.executeCommand('sdct.sendMedia', chatRoom, message);
+                        break;
+                    case EMessageType.File:
+                        vscode.commands.executeCommand('sdct.sendFile', chatRoom, message);
+                        break;
+                    case EMessageType.Code:
+                        vscode.commands.executeCommand('sdct.sendCodeMessage', chatRoom, message);
+                        break;
+                };
             });
 
         }else{

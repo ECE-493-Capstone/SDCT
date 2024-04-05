@@ -30,7 +30,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
         case 'chat':
           const newMessage = {
             content: message.message.content, 
-            timestamp: new Date(), 
+            timestamp: new Date(message.message.timestamp), 
             sender: message.chatRoom.user as IUser,
             type: EMessageType.Text
           };
@@ -39,37 +39,33 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           setMessage("");
           break;
         case 'media':
-          const media = message.media[0];
           // send media
-          const isVideo = media.path.endsWith('.mp4');
+          const isVideo = message.message.content.toString().endsWith('.mp4');
           const mediaMessage = {
-            content: media.path, // change with URL of media in server
-            timestamp: new Date(),
+            content: message.message.content, // change with URL of media in server
+            timestamp: new Date(message.message.timestamp),
             sender: message.chatRoom.user,
             type: isVideo ? EMessageType.MediaVideo : EMessageType.Media,
           };
           handleNewMessage(mediaMessage);
           break;
         case 'file':
-          const file = message.file[0];
           // send file
           const fileMessage = {
-            content: file.path, // change with URL of file in server
-            timestamp: new Date(),
+            content: message.message.content, // change with URL of file in server
+            timestamp: new Date(message.message.timestamp),
             sender: message.chatRoom.user,
             type: EMessageType.File
           };
           handleNewMessage(fileMessage);
           break;
         case 'code':{
-          const language = message.language;
-          const content = message.message.content;
           const codeMessage = {
-            content: content,
-            timestamp: new Date(),
+            content: message.message.content,
+            timestamp: new Date(message.message.timestamp),
             sender: message.chatRoom.user,
             type: EMessageType.Code,
-            language
+            language: message.language
           };
           handleNewMessage(codeMessage);
           break;
