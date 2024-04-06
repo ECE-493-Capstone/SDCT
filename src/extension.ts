@@ -43,7 +43,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const codeSession = new CodeSession(context);
 	
-	let chatdata:IChat[] = [];
 	if(context.globalState.get('codeSession')){
 		console.log(context.globalState.get('codeRoom'));
 		const _chatdata = context.globalState.get<IChatRoom>('codeRoom');
@@ -51,8 +50,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		if(_chatdata){
 			vscode.commands.executeCommand('sdct.openCodeSession', _chatdata);
 		}
+		context.globalState.update('codeSession', false);
 	}
-	const chatListProvider = new ChatListProvider(context, backendAPI, chatdata);
+	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
