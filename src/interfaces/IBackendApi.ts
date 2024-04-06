@@ -35,3 +35,14 @@ export interface IApiGroup{
     GroupId: number,
     GroupName: string,
 }
+
+export interface IApiMessage{
+    MessageId:12,
+    SendId: string,
+    RecvId: string,
+    MessageType: string,
+    MessageTime: number,
+    MessageText: string,
+    MessageLoc: string,
+    ImageURL: string
+}

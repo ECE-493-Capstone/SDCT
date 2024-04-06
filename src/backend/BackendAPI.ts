@@ -1,6 +1,8 @@
 import { IUser } from '../interfaces/IUser';
-import { IChat } from "../interfaces/IChat";
-import { IApiFriend, IApiGroup, IApiGroupChatList } from "../interfaces/IBackendApi"
+import { IMessage } from '../interfaces/IMessage';
+import { IApiFriend, IApiGroup, IApiMessage } from "../interfaces/IBackendApi"
+import { IChatRoom } from '../interfaces/IChatRoom';
+import { EMessageType } from '../enums/EMessageType';
 
 export class BackendAPI {
     private userID: string = "";
@@ -252,5 +254,41 @@ export class BackendAPI {
         }
 
         return false;
+    }
+
+    async getFriendMessageHistory(chatRoom: IChatRoom): Promise<IMessage[]>{
+        const apiData = await this.getRequest(`/get_messages_friend/${this.userID}/${chatRoom.name}`);
+        
+        const messageList: IMessage[] = [];
+        if(apiData){
+            const data_json = await apiData.json() as {data: IApiMessage[]};
+
+            for(let message of data_json.data){
+                messageList.push({content: message.MessageText,
+                                 sender: <IUser>{name: message.SendId, pictureUri: message.ImageURL},
+                                 timestamp: new Date(message.MessageTime),
+                                 type: <EMessageType>message.MessageType});
+            }
+        }
+
+        return messageList;
+    }
+
+    async getGroupMessageHistory(chatRoom: IChatRoom): Promise<IMessage[]>{
+        const apiData = await this.getRequest(`/get_messages_group/${this.userID}/${chatRoom.groupId}`);
+        
+        const messageList: IMessage[] = [];
+        if(apiData){
+            const data_json = await apiData.json() as {data: IApiMessage[]};
+
+            for(let message of data_json.data){
+                messageList.push({content: message.MessageText,
+                                 sender: <IUser>{name: message.SendId, pictureUri: message.ImageURL},
+                                 timestamp: new Date(message.MessageTime),
+                                 type: <EMessageType>message.MessageType});
+            }
+        }
+
+        return messageList;
     }
 }
