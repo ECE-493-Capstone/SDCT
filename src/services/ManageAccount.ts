@@ -41,9 +41,10 @@ async function createGroup(api: BackendAPI) {
         const friendData = await api.getFriends();
         const members = await vscode.window.showQuickPick(friendData.map(function(item){return item.FriendId.toString()}), { canPickMany: true });
         if (!!members) {
+            members.push(api.getUser());
             for(let member of members){
                 if(!await api.addUserToGroup(groupId, member)){
-                    console.log(`Unable to add ${member} to ${groupId}`)
+                    console.log(`Unable to add ${member} to ${groupId}`);
                     return;
                 }
             }
@@ -54,10 +55,17 @@ async function createGroup(api: BackendAPI) {
 
 async function acceptInvites(api: BackendAPI) {
     const inviteData = await api.getInvites();
-    const acceptInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
+    const acceptInvites = await vscode.window.showQuickPick(inviteData.map(function(item){return item.name.toString()}), { canPickMany: true });
     if (!!acceptInvites) {
-        for (let friend of acceptInvites){
-            await api.acceptFriendInvite(friend);
+        for (let invite of acceptInvites){
+            if(invite.startsWith("Group: ")){
+                const groupid = inviteData.find(function(item){return item.name.toString() === invite})?.id
+                if(groupid){
+                    await api.acceptGroupInvite(groupid);
+                }
+            } else{
+                await api.acceptFriendInvite(invite);
+            }
         }
         vscode.window.showInformationMessage(`Accepted invites`);
     }
@@ -65,10 +73,18 @@ async function acceptInvites(api: BackendAPI) {
 
 async function declineInvites(api: BackendAPI) {
     const inviteData = await api.getInvites();
-    const declineInvites = await vscode.window.showQuickPick(inviteData.map(String), { canPickMany: true });
+    const declineInvites = await vscode.window.showQuickPick(inviteData.map(function(item){return item.name.toString()}), { canPickMany: true });
     if (!!declineInvites) {
-        for (let friend of declineInvites){
-            await api.declineFriendInvite(friend);
+        for (let invite of declineInvites){
+            if(invite.startsWith("Group: ")){
+                const groupid = inviteData.find(function(item){return item.name.toString() === invite})?.id
+                console.log(groupid)
+                if(groupid){
+                    await api.declineGroupInvite(groupid);
+                }
+            } else{
+                await api.declineFriendInvite(invite);
+            }
         }
         vscode.window.showInformationMessage(`Declined invites`);
     }
