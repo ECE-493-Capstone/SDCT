@@ -26,10 +26,9 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     this._onDidChangeTreeData.fire();
   }
 
-  constructor(context: vscode.ExtensionContext, backendApi: BackendAPI, data: IChat[]) {
+  constructor(context: vscode.ExtensionContext, backendApi: BackendAPI) {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this.backendApi = backendApi;
-    this.data = data;
   }
 
   getTreeItem(element: IChat): vscode.TreeItem {
