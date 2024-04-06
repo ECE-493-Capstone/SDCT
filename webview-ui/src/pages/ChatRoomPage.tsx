@@ -57,6 +57,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
             sender: message.chatRoom.user,
             type: EMessageType.File
           };
+          console.log(fileMessage);
           handleNewMessage(fileMessage);
           break;
         case 'code':{
@@ -132,7 +133,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     <main>
       <div className="chatContent">
         {messageHistory.map((message, index) => (
-          <div key={index} style={{ textAlign: message.sender !== chatRoom.user ? 'left' : 'right' }}>
+          <div key={index} style={{ textAlign: message.sender != chatRoom.user ? 'left' : 'right' }}>
             {message.sender !== chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
             {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
             {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}

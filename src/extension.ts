@@ -18,6 +18,7 @@ import { IMessage } from './interfaces/IMessage';
 import { IFriend } from "./interfaces/IFriend"
 import { spawn, ChildProcessWithoutNullStreams} from "child_process"
 import { WhiteboardPanel } from './panels/WhiteboardPanel';
+import { EMessageType }from './enums/EMessageType'
 
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
@@ -90,7 +91,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		manageAccount(backendAPI);
 	});
 
-	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", (chat: IChat) => {
+	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", async (chat: IChat) => {
+
 		const userAuth = context.globalState.get<IUser>('userAuth');
 		const emptyUser: IUser = { name: "", pictureUri: "" };
 		const user = userAuth ? userAuth : emptyUser;
@@ -99,6 +101,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			const friend: IFriend = { name: chat.name, friendid: chat.friendId,pictureUri: chat.pictureUri };
 			friends.push(friend);
 		} else {
+			
 			// for (let i = 0; i < 3; i++) { // MOCK DATA
 			// 	const friend: IFriend = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
 			// 	friends.push(friend);
@@ -113,7 +116,36 @@ export async function activate(context: vscode.ExtensionContext) {
 			friendId: chat.friendId,
 			groupId: chat.groupId
 		};
+		
+		if(ChatRoomPanel.currentPanels.has(ChatRoomPanel.getChatRoomId(chatRoom))){
+			ChatRoomPanel.render(context.extensionUri, chatRoom);
+			return;
+		}
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
+
+		let messages: IMessage[] = []
+		if(chatRoom.friendId){
+			messages = await backendAPI.getFriendMessageHistory(chatRoom);
+		} else{
+			messages = await backendAPI.getGroupMessageHistory(chatRoom);
+		}
+		for(let message of messages.reverse()){
+			switch (message.type) {
+				case EMessageType.Text:
+					vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
+					break;
+				case EMessageType.Media:
+					vscode.commands.executeCommand('sdct.sendMedia', chatRoom, message);
+					break;
+				case EMessageType.File:
+					vscode.commands.executeCommand('sdct.sendFile', chatRoom, message);
+					break;
+				case EMessageType.Code:
+					vscode.commands.executeCommand('sdct.sendCodeMessage', chatRoom, message);
+					break;
+			}
+		}
+
 		ChatSocket.socketEmit("join chat", ChatRoomPanel.getChatRoomId(chatRoom));
 	});
 
