@@ -62,6 +62,10 @@ export class BackendAPI {
         return false;
     }
 
+    getUser(): string{
+        return this.userID;
+    }
+
     async getFriends(): Promise<IApiFriend[]>{
         const friends = await this.getRequest(`/get_friends/${this.userID}`);
 
@@ -162,15 +166,15 @@ export class BackendAPI {
         return false;
     }
 
-    async getInvites(): Promise<string[]>{
-        const inviteList: string[] = []
+    async getInvites(): Promise<{name: string, id: string}[]>{
+        const inviteList: {name: string, id: string}[] = []
         const friend_invites = await this.getRequest(`/list_received_invitations_friends/${this.userID}`);
 
         if(friend_invites){
             const data = await friend_invites.json() as {data: {UserId: string}[]};
             if(data){
                 for(let invite of data.data ){
-                    inviteList.push(invite.UserId);
+                    inviteList.push({name: invite.UserId, id: invite.UserId});
                 }
             }
 
@@ -178,10 +182,10 @@ export class BackendAPI {
 
         const group_invites = await this.getRequest(`/list_received_invitations_groups/${this.userID}`);
         if(group_invites){
-            const data = await group_invites.json() as {data: string[]};
+            const data = await group_invites.json() as {data: {GroupId: string,GroupName: string}[]};
             if(data){
                 for(let invite of data.data ){
-                    inviteList.push(invite);
+                    inviteList.push({name: `Group: ${invite.GroupName}`, id: invite.GroupId});
                 }
             }
 
@@ -225,6 +229,25 @@ export class BackendAPI {
     async addUserToGroup(groupId: number, userId: string): Promise<boolean>{
         const success = await this.postRequest(`/invite_group`, {GroupId: groupId, UserId: userId});
         if(success){
+            return true;
+        }
+
+        return false;
+    }
+
+    async acceptGroupInvite(group: string): Promise<boolean>{
+        const apiData = await this.postRequest(`/accept_invite_group`, {GroupId: group, UserId: this.userID});
+        
+        if(apiData){
+            return true;
+        }
+
+        return false;
+    }
+    async declineGroupInvite(group: string): Promise<boolean>{
+        const apiData = await this.postRequest(`/decline_invite_group`, {GroupId: group, UserId: this.userID});
+        
+        if(apiData){
             return true;
         }
 
