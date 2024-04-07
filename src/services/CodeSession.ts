@@ -151,7 +151,7 @@ export class CodeSession {
   }
 }
 
-export class CodeDecorator{
+export class CodeHelper{
   private static decorationType = vscode.window.createTextEditorDecorationType({
     borderWidth: '1px',
     borderStyle: 'solid',
@@ -162,37 +162,56 @@ export class CodeDecorator{
   private context: vscode.ExtensionContext;
   private static selections: Map<string, vscode.Range> = new Map();
   private static _disposables: vscode.Disposable[] = [];
+  private static socketChanges: vscode.TextDocumentContentChangeEvent[] = [];
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
   }
 
   start(roomid: string){
-    CodeDecorator._disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => {
-      CodeDecorator.activeEditor = editor;
+    CodeHelper._disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+      CodeHelper.activeEditor = editor;
       if (editor) {
-        CodeDecorator.updateDecorations();
+        CodeHelper.updateDecorations();
       }
     }, null, this.context.subscriptions));
   
-    CodeDecorator._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
-        if (CodeDecorator.activeEditor && event.document === CodeDecorator.activeEditor.document) {
-          CodeDecorator.selections.clear();
-          CodeDecorator.updateDecorations();
+    CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
+        if (CodeHelper.activeEditor && event.document === CodeHelper.activeEditor.document) {
+          CodeHelper.selections.clear();
+          CodeHelper.updateDecorations();
         }
       }, null, this.context.subscriptions));
 
-    CodeDecorator._disposables.push(vscode.window.onDidChangeTextEditorSelection(event => {
-      if(CodeDecorator.activeEditor === event.textEditor){
+    CodeHelper._disposables.push(vscode.window.onDidChangeTextEditorSelection(event => {
+      if(CodeHelper.activeEditor === event.textEditor){
         CodeSocket.socketEmit("send selection change", roomid, event.selections[0].start, 
           event.selections[0].end, this.context.globalState.get<IUser>('userAuth')?.name);
+      }
+    }, null, this.context.subscriptions));
+  
+    CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
+      if(CodeHelper.activeEditor?.document === event.document){
+
+        for(let change of event.contentChanges){
+          for(var i = 0; i < CodeHelper.socketChanges.length; i++){
+            const item = CodeHelper.socketChanges[i];
+
+            if(item.range.isEqual(change.range) && item.text === change.text){
+              CodeHelper.socketChanges.splice(i,1);
+              return;
+            }
+          }
+          CodeSocket.socketEmit("send file change", roomid, JSON.stringify(change));
+        }
+
       }
     }, null, this.context.subscriptions));
   }
 
   stopListeners(){
-    while (CodeDecorator._disposables.length) {
-      const disposable = CodeDecorator._disposables.pop();
+    while (CodeHelper._disposables.length) {
+      const disposable = CodeHelper._disposables.pop();
       if (disposable) {
         disposable.dispose();
       }
@@ -203,13 +222,23 @@ export class CodeDecorator{
     if (!this.activeEditor) {
       return;
     }
-    this.activeEditor.setDecorations(CodeDecorator.decorationType, 
-      Array.from(CodeDecorator.selections, ([hoverMessage, range]) => ({ hoverMessage, range })));
+    this.activeEditor.setDecorations(CodeHelper.decorationType, 
+      Array.from(CodeHelper.selections, ([hoverMessage, range]) => ({ hoverMessage, range })));
   }
 
   public static updateSelections(start: vscode.Position, end: vscode.Position, user: string){
-    CodeDecorator.selections.set(user, new vscode.Range(start, end));
-    CodeDecorator.updateDecorations();
+    CodeHelper.selections.set(user, new vscode.Range(start, end));
+    CodeHelper.updateDecorations();
+  }
+
+  public static async updateFile(change: vscode.TextDocumentContentChangeEvent){
+    if (!this.activeEditor) {
+      return;
+    }
+    this.activeEditor.edit(editBuilder => {
+        editBuilder.replace(change.range, change.text);
+        CodeHelper.socketChanges.push(change);
+    });
   }
 }
 

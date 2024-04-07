@@ -3,7 +3,7 @@ import { Server } from "socket.io"
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
 import { EMessageType } from '../enums/EMessageType'
-import { CodeDecorator } from '../services/CodeSession'
+import { CodeHelper } from '../services/CodeSession'
 
 import * as vscode from "vscode"
 
@@ -131,7 +131,25 @@ export class CodeSocket{
 
 
             CodeSocket.socket.on("get selection change", (start, end, user) => {
-                CodeDecorator.updateSelections(start, end, user);
+                CodeHelper.updateSelections(start, end, user);
+            });
+
+            CodeSocket.socket.on("get file change", (changes) => {
+                const _changes = JSON.parse(changes);
+                
+                const documentChange: vscode.TextDocumentContentChangeEvent = {
+                    range: new vscode.Range(
+                        _changes.range[0].line,
+                        _changes.range[0].character,
+                        _changes.range[1].line,
+                        _changes.range[1].character),
+                    rangeOffset: _changes.rangeOffset,
+                    rangeLength: _changes.rangeLength,
+                    text: _changes.text,
+                };
+                    
+
+                CodeHelper.updateFile(documentChange);
             });
         }else{
             console.log("No socket")

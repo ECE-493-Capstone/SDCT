@@ -19,7 +19,7 @@ import { IFriend } from "./interfaces/IFriend"
 import { spawn, ChildProcessWithoutNullStreams} from "child_process"
 import { WhiteboardPanel } from './panels/WhiteboardPanel';
 import { EMessageType }from './enums/EMessageType'
-import { CodeSession, CodeDecorator } from './services/CodeSession'
+import { CodeSession, CodeHelper } from './services/CodeSession'
 
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
@@ -41,7 +41,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const codeSocket = new CodeSocket(BackendURL, SocketPort);
 
 	const codeSession = new CodeSession(context);
-	const codeDecorator = new CodeDecorator(context);
+	const codeDecorator = new CodeHelper(context);
 
 	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
 	if(joinedCodeSession){
