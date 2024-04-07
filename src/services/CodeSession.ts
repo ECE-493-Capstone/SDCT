@@ -6,16 +6,14 @@ import { CodeSocket } from '../backend/BackendSocket';
 import { readFileSync } from 'fs';
 import { ChatRoomPanel } from '../panels/ChatRoomPanel';
 import { IChatRoom } from '../interfaces/IChatRoom';
+import { IUser } from '../interfaces/IUser'
 
 export class CodeSession {
   private storagePath: string | undefined;
-  private context = <vscode.ExtensionContext>{};
   public static filepath: string | undefined;
-
 
   constructor(context: vscode.ExtensionContext) {
     this.storagePath = context.globalStorageUri.fsPath;
-    this.context = context;
     if(!fs.existsSync(this.storagePath)){
       fs.mkdirSync(this.storagePath);
     }
@@ -80,58 +78,6 @@ export class CodeSession {
     return true;
   }
 
-
-  private startDecorator(){
-    let timeout: NodeJS.Timeout | undefined = undefined;
-
-    // create a decorator type for cursor
-    const test = vscode.window.createTextEditorDecorationType({
-      borderWidth: '1px',
-      borderStyle: 'solid',
-      overviewRulerColor: 'blue',
-      overviewRulerLane: vscode.OverviewRulerLane.Right,
-    });
-  
-    let activeEditor = vscode.window.activeTextEditor;
-  
-    function updateDecorations() {
-      if (!activeEditor) {
-        return;
-      }
-      [{ range: new vscode.Range(activeEditor.document.positionAt(10), activeEditor.document.positionAt(10)), hoverMessage: 'User1' }]
-      activeEditor.setDecorations(test,[{ range: new vscode.Range(activeEditor.document.positionAt(10), activeEditor.document.positionAt(10)), hoverMessage: 'User1' }])
-    }
-  
-    function triggerUpdateDecorations(throttle = false) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = undefined;
-      }
-      if (throttle) {
-        timeout = setTimeout(updateDecorations, 500);
-      } else {
-        updateDecorations();
-      }
-    }
-  
-    if (activeEditor) {
-      triggerUpdateDecorations();
-    }
-  
-    vscode.window.onDidChangeActiveTextEditor(editor => {
-      activeEditor = editor;
-      if (editor) {
-        triggerUpdateDecorations();
-      }
-    }, null, this.context.subscriptions);
-  
-    vscode.workspace.onDidChangeTextDocument(event => {
-      if (activeEditor && event.document === activeEditor.document) {
-        triggerUpdateDecorations(true);
-      }
-    }, null, this.context.subscriptions);
-  }
-  
   async startSession(chatRoom: IChatRoom): Promise<boolean>{
     await this.archiveWorkspace();
 		if(CodeSession.filepath === undefined){
@@ -204,7 +150,67 @@ export class CodeSession {
       return false;
       //this.startDecorator();
   }
+}
 
+export class CodeDecorator{
+  private static decorationType = vscode.window.createTextEditorDecorationType({
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    overviewRulerColor: 'blue',
+    overviewRulerLane: vscode.OverviewRulerLane.Full,
+  });
+  private static activeEditor = vscode.window.activeTextEditor;
+  private context: vscode.ExtensionContext;
+  private static selections: Map<string, vscode.Range> = new Map();
+  private static _disposables: vscode.Disposable[] = [];
 
+  constructor(context: vscode.ExtensionContext) {
+    this.context = context;
+  }
+
+  start(roomid: string){
+    CodeDecorator._disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+      CodeDecorator.activeEditor = editor;
+      if (editor) {
+        CodeDecorator.updateDecorations();
+      }
+    }, null, this.context.subscriptions));
+  
+    CodeDecorator._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
+        if (CodeDecorator.activeEditor && event.document === CodeDecorator.activeEditor.document) {
+          CodeDecorator.selections.clear();
+          CodeDecorator.updateDecorations();
+        }
+      }, null, this.context.subscriptions));
+
+    CodeDecorator._disposables.push(vscode.window.onDidChangeTextEditorSelection(event => {
+      if(CodeDecorator.activeEditor === event.textEditor){
+        CodeSocket.socketEmit("send selection change", roomid, event.selections[0].start, 
+          event.selections[0].end, this.context.globalState.get<IUser>('userAuth')?.name);
+      }
+    }, null, this.context.subscriptions));
+  }
+
+  stopListeners(){
+    while (CodeDecorator._disposables.length) {
+      const disposable = CodeDecorator._disposables.pop();
+      if (disposable) {
+        disposable.dispose();
+      }
+    }
+  }
+
+  public static updateDecorations() {
+    if (!this.activeEditor) {
+      return;
+    }
+    this.activeEditor.setDecorations(CodeDecorator.decorationType, 
+      Array.from(CodeDecorator.selections, ([hoverMessage, range]) => ({ hoverMessage, range })));
+  }
+
+  public static updateSelections(start: vscode.Position, end: vscode.Position, user: string){
+    CodeDecorator.selections.set(user, new vscode.Range(start, end));
+    CodeDecorator.updateDecorations();
+  }
 }
 
