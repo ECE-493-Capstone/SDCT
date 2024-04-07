@@ -36,7 +36,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	await credentials.initialize(context);
 	
 	const backendAPI = new BackendAPI(BackendURL, ApiPort);
-	const backendSocket = new ChatSocket(BackendURL, SocketPort);
+	const chatSocket = new ChatSocket(BackendURL, SocketPort);
 	const voiceSocket = new VoiceSocket(BackendURL, SocketPort)
 	const codeSocket = new CodeSocket(BackendURL, SocketPort);
 
@@ -60,12 +60,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 	const user = context.globalState.get<IUser>('userAuth')
 	if(user){
+		chatSocket.startSocketIO();
 		backendAPI.updateUser(user)
 		await chatListProvider.refresh(context);
 		profileProvider.refresh(context);
 	}
-
-
 
 	var voiceSession: ChildProcessWithoutNullStreams;
 	// The command has been defined in the package.json file
@@ -80,7 +79,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: userInfo.data.login,
 			pictureUri: userInfo.data.avatar_url
 		};
-		backendSocket.startSocketIO();
+		chatSocket.startSocketIO();
 		backendAPI.login(userAuth).then(async (success) =>{
 			if(success){
 				context.globalState.update('userAuth', userAuth);
@@ -270,7 +269,7 @@ export async function activate(context: vscode.ExtensionContext) {
 			name: "MOCKUSER",
 			pictureUri: "adada"
 		};
-		backendSocket.startSocketIO();
+		chatSocket.startSocketIO();
 		backendAPI.login(userAuth).then(async (success) => {
 			if(success){
 				context.globalState.update('userAuth', userAuth);
