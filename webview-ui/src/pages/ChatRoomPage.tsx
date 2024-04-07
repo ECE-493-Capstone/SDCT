@@ -138,16 +138,10 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     hours = hours % 12 ? hours % 12 : 12;
     minutes = minutes < 10 ? "0" + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
-  }; 
-
-  const debug = () => {
-    console.log(chatRoom);
-    console.log(messageHistory);
   };
   
   return (
     <main>
-      <VSCodeButton onClick={debug}>DEBUG</VSCodeButton>
       <div className="chatContent">
         {messageHistory.map((message, index) => (
           <div key={index} style={{ textAlign: message.sender.name !== chatRoom.user.name ? 'left' : 'right' }}>
