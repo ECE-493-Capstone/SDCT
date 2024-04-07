@@ -133,7 +133,6 @@ export class CodeSession {
           CodeSession.filepath = `${this.storagePath}/${file.name}.tar.gz`
           fs.writeFileSync(CodeSession.filepath, file.data, {encoding: null});
           if(await this.loadWorkspace()){
-            context.globalState.update('codeSession', true);
             context.globalState.update('codeRoom', chatRoom)
             await vscode.commands.executeCommand(
               'vscode.openFolder', 
