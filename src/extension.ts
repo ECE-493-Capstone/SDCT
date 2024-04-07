@@ -21,7 +21,6 @@ import { WhiteboardPanel } from './panels/WhiteboardPanel';
 import { EMessageType }from './enums/EMessageType'
 import { CodeSession } from './services/CodeSession'
 
-
 const BackendURL = "http://[2605:fd00:4:1000:f816:3eff:fe7d:baf9]";
 const ApiPort = 8000;
 const SocketPort = 3000;
