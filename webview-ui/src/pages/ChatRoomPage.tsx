@@ -89,6 +89,17 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           setMessage("");
           break;
         }
+        case 'messageHistory':
+          const reversedMessageHistory = message.messageHistory.reverse();
+          const newMessageHistory = [...reversedMessageHistory];
+          newMessageHistory.forEach((msg: IMessage) => {
+            msg.timestamp = new Date(msg.timestamp);
+            if (msg.type === EMessageType.Media) {
+              msg.type =  msg.content.toString().endsWith('.mp4') ? EMessageType.MediaVideo : EMessageType.Media;
+            }
+          });
+          setMessageHistory(newMessageHistory);
+          break;
       };
     };
 
@@ -127,14 +138,14 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     hours = hours % 12 ? hours % 12 : 12;
     minutes = minutes < 10 ? "0" + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
-  }; 
+  };
   
   return (
     <main>
       <div className="chatContent">
         {messageHistory.map((message, index) => (
-          <div key={index} style={{ textAlign: message.sender != chatRoom.user ? 'left' : 'right' }}>
-            {message.sender !== chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+          <div key={index} style={{ textAlign: message.sender.name !== chatRoom.user.name ? 'left' : 'right' }}>
+            {message.sender.name !== chatRoom.user.name && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
             {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
             {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
             {message.type === EMessageType.MediaVideo ? 
@@ -148,7 +159,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
                 {message.content}
               </SyntaxHighlighter> : null}
             {!!message.content && <span>{getTimeFormatted(message.timestamp)}</span>}
-            {message.sender === chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+            {message.sender.name === chatRoom.user.name && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
           </div>
         ))}
       </div>

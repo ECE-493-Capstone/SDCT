@@ -123,27 +123,15 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 		ChatRoomPanel.render(context.extensionUri, chatRoom);
 
-		let messages: IMessage[] = []
+		let messageHistory: IMessage[] = []
 		if(chatRoom.friendId){
-			messages = await backendAPI.getFriendMessageHistory(chatRoom);
+			messageHistory = await backendAPI.getFriendMessageHistory(chatRoom);
 		} else{
-			messages = await backendAPI.getGroupMessageHistory(chatRoom);
+			messageHistory = await backendAPI.getGroupMessageHistory(chatRoom);
 		}
-		for(let message of messages.reverse()){
-			switch (message.type) {
-				case EMessageType.Text:
-					vscode.commands.executeCommand('sdct.sendChatMessage', chatRoom, message);
-					break;
-				case EMessageType.Media:
-					vscode.commands.executeCommand('sdct.sendMedia', chatRoom, message);
-					break;
-				case EMessageType.File:
-					vscode.commands.executeCommand('sdct.sendFile', chatRoom, message);
-					break;
-				case EMessageType.Code:
-					vscode.commands.executeCommand('sdct.sendCodeMessage', chatRoom, message);
-					break;
-			}
+		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
+		if(panel){
+			panel.webview.postMessage({command: "messageHistory", messageHistory});
 		}
 
 		ChatSocket.socketEmit("join chat", ChatRoomPanel.getChatRoomId(chatRoom));
