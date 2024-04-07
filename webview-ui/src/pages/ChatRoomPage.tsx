@@ -89,6 +89,14 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           setMessage("");
           break;
         }
+        case 'messageHistory':
+          const reversedMessageHistory = message.messageHistory.reverse();
+          const newMessageHistory = [...reversedMessageHistory];
+          newMessageHistory.forEach((msg: IMessage) => {
+            msg.timestamp = new Date(msg.timestamp);
+          });
+          setMessageHistory(newMessageHistory);
+          break;
       };
     };
 
