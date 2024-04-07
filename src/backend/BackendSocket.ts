@@ -1,11 +1,10 @@
 import { io, Socket} from "socket.io-client";
 import { Server } from "socket.io"
-import { ChatRoomPanel } from '../panels/ChatRoomPanel';
-import { IUser } from "../interfaces/IUser";
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
 import { EMessageType } from '../enums/EMessageType'
-import { CodeSessionPanel } from "../panels/CodeSessionPanel";
+import { CodeDecorator } from '../services/CodeSession'
+
 import * as vscode from "vscode"
 
 export class ChatSocket{
@@ -130,6 +129,10 @@ export class CodeSocket{
                 }
             });
 
+
+            CodeSocket.socket.on("get selection change", (start, end, user) => {
+                CodeDecorator.updateSelections(start, end, user);
+            });
         }else{
             console.log("No socket")
         }
