@@ -94,6 +94,9 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
           const newMessageHistory = [...reversedMessageHistory];
           newMessageHistory.forEach((msg: IMessage) => {
             msg.timestamp = new Date(msg.timestamp);
+            if (msg.type === EMessageType.Media) {
+              msg.type =  msg.content.toString().endsWith('.mp4') ? EMessageType.MediaVideo : EMessageType.Media;
+            }
           });
           setMessageHistory(newMessageHistory);
           break;
