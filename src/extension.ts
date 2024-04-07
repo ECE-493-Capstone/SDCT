@@ -43,14 +43,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	const codeSession = new CodeSession(context);
 	const codeDecorator = new CodeDecorator(context);
 
-	if(context.globalState.get('codeSession')){
-		console.log(context.globalState.get('codeRoom'));
-		const _chatdata = context.globalState.get<IChatRoom>('codeRoom');
-		console.log(_chatdata);
-		if(_chatdata){
-			vscode.commands.executeCommand('sdct.openCodeSession', _chatdata);
-		}
-		context.globalState.update('codeSession', false);
+	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
+	if(joinedCodeSession){
+		codeSocket.startSocketIO()
+		vscode.commands.executeCommand('sdct.openCodeSession', joinedCodeSession);
+		CodeSocket.socketEmit("join code session", ChatRoomPanel.getChatRoomId(joinedCodeSession));
+		context.globalState.update('codeRoom', undefined);
 	}
 	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
