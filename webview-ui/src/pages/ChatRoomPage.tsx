@@ -128,13 +128,19 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
     minutes = minutes < 10 ? "0" + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
   }; 
+
+  const debug = () => {
+    console.log(chatRoom);
+    console.log(messageHistory);
+  };
   
   return (
     <main>
+      <VSCodeButton onClick={debug}>DEBUG</VSCodeButton>
       <div className="chatContent">
         {messageHistory.map((message, index) => (
-          <div key={index} style={{ textAlign: message.sender != chatRoom.user ? 'left' : 'right' }}>
-            {message.sender !== chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+          <div key={index} style={{ textAlign: message.sender.name !== chatRoom.user.name ? 'left' : 'right' }}>
+            {message.sender.name !== chatRoom.user.name && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
             {message.type === EMessageType.Text ? <span>{message.content} </span> : null}
             {message.type === EMessageType.Media ? <img src={message.content} width="150" /> : null}
             {message.type === EMessageType.MediaVideo ? 
@@ -148,7 +154,7 @@ function ChatRoomPage({chatRoom}: {chatRoom: IChatRoom}) {
                 {message.content}
               </SyntaxHighlighter> : null}
             {!!message.content && <span>{getTimeFormatted(message.timestamp)}</span>}
-            {message.sender === chatRoom.user && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
+            {message.sender.name === chatRoom.user.name && !!message.content ? <img src={message.sender.pictureUri} width="20" /> : null}
           </div>
         ))}
       </div>
