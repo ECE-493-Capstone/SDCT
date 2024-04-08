@@ -12,7 +12,7 @@ export class ChatSocket{
     private static socket: Socket | undefined;
 
     constructor(socketUrl: string, socketPort: number){
-        ChatSocket.socket = io(`${socketUrl}:${socketPort}/chat`, { autoConnect: false });
+        ChatSocket.socket = io(`${socketUrl}:${socketPort}/chat`, { autoConnect: false, transports: ["websocket"] });
     }
 
     startSocketIO(){
@@ -74,7 +74,7 @@ export class VoiceSocket{
     private socket: Socket
 
     constructor(socketUrl: string, socketPort: number){
-        this.socket = io(`${socketUrl}:${socketPort}/voice`, { autoConnect: false });
+        this.socket = io(`${socketUrl}:${socketPort}/voice`, { autoConnect: false, transports: ["websocket"],forceNew: true });
 
         this.socket.on("connect_error", (err) => {
             if (err.message === "invalid username") {
@@ -123,9 +123,8 @@ export class VoiceSocket{
 
 export class CodeSocket{
     private static socket: Socket | undefined;
-    private static isHost: boolean = false;
     constructor(socketUrl: string, socketPort: number){
-        CodeSocket.socket = io(`${socketUrl}:${socketPort}/code`, { autoConnect: false });
+        CodeSocket.socket = io(`${socketUrl}:${socketPort}/code`, { autoConnect: false, transports: ["websocket"],forceNew: true });
     }
 
     startSocketIO(){
@@ -140,11 +139,11 @@ export class CodeSocket{
             });
 
 
-            CodeSocket.socket.on("get selection change", (start, end, user) => {
-                CodeHelper.updateSelections(start, end, user);
+            CodeSocket.socket.on("get selection change", (file, start, end, user) => {
+                CodeHelper.updateSelections(file, start, end, user);
             });
 
-            CodeSocket.socket.on("get file change", async (changes) => {
+            CodeSocket.socket.on("get file change", async (file, changes) => {
                 const _changes = JSON.parse(changes);
                 
                 const documentChange: vscode.TextDocumentContentChangeEvent = {
@@ -157,16 +156,14 @@ export class CodeSocket{
                     rangeLength: _changes.rangeLength,
                     text: _changes.text,
                 };
-                    
+                console.log(file, _changes)
 
-                await CodeHelper.updateFile(documentChange);
+                await CodeHelper.updateFile(file as string, documentChange);
             });
 
             CodeSocket.socket.on("readOnly", async (readOnly)=>{
                 await CodeHelper.updateReadOnly(readOnly);
             })
-
-            CodeSocket.isHost = true;
         }else{
             console.log("No socket")
         }

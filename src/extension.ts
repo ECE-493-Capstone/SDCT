@@ -43,12 +43,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	const codeSession = new CodeSession(context);
 	const codeDecorator = new CodeHelper(context);
 
-	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
+	const joinedCodeSession = context.globalState.get<{chatRoom: IChatRoom, filepath: string}>('codeRoom');
 	if(joinedCodeSession){
 		codeSocket.startSocketIO()
+		CodeSession.setFilePath(joinedCodeSession.filepath)
 		vscode.commands.executeCommand('sdct.openCodeSession', joinedCodeSession);
-		CodeSocket.socketEmit("join code session", ChatRoomPanel.getChatRoomId(joinedCodeSession));
-		context.globalState.update('codeRoom', undefined);
+		CodeSocket.socketEmit("join code session", ChatRoomPanel.getChatRoomId(joinedCodeSession.chatRoom));
+		await context.globalState.update('codeRoom', undefined);
 	}
 	const chatListProvider = new ChatListProvider(context, backendAPI);
 	vscode.window.createTreeView('chatList', {
@@ -105,7 +106,9 @@ export async function activate(context: vscode.ExtensionContext) {
 		chatListProvider.searchChatList();
 	});
 
-	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', () => {
+	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', async () => {
+		let _file = await vscode.workspace.findFiles(`src/flask/json/provider.py`);
+		console.log(_file)
 		manageAccount(backendAPI);
 	});
 
@@ -314,6 +317,6 @@ export function deactivate(context: vscode.ExtensionContext) {
 		
 	} 
 	vscode.commands.executeCommand('sdct.endVoiceChat');
-	CodeSocket.endCodeSession();
+	CodeSession.endCodeSession();
 	ChatSocket.endSocket();
 }
