@@ -10,7 +10,9 @@ import { IUser } from '../interfaces/IUser'
 
 export class CodeSession {
   private storagePath: string | undefined;
-  public static filepath: string | undefined;
+  private static filepath: string | undefined;
+  private static _chatRoom: IChatRoom;
+  private static isHost: boolean = false;
 
   constructor(context: vscode.ExtensionContext) {
     this.storagePath = context.globalStorageUri.fsPath;
@@ -19,6 +21,10 @@ export class CodeSession {
     }
 	}
   
+  public static setFilePath(filepath: string){
+    CodeSession.filepath = filepath;
+  }
+
   private async archiveWorkspace(): Promise<string | undefined>{
 		let workspacename = vscode.workspace.name;
 		let workspacefolders = vscode.workspace.workspaceFolders?.map(folder => folder.uri.fsPath)
@@ -70,7 +76,6 @@ export class CodeSession {
     } else {
       if(CodeSession.filepath){
         await this.extractWorkspace()
-        // vscode.workspace.updateWorkspaceFolders(1,null,{uri:vscode.Uri.file(`${this.storagePath}/${workspacename}`)})
       }
 
     }
@@ -93,6 +98,8 @@ export class CodeSession {
           vscode.window.showErrorMessage("CodeSession exists for this room");
           CodeSession.endCodeSession();
         } else if (response === "Started"){
+          CodeSession.isHost = true;
+          CodeSession._chatRoom = chatRoom;
           resolve(true);
         } else{
           vscode.window.showErrorMessage("Backend Error");
@@ -119,8 +126,13 @@ export class CodeSession {
         if (err) throw err //handle your error the way you want to;
         console.log('path/file.txt was deleted');//or else the file will be deleted
       });
-      CodeSocket.endCodeSession();
+
     }
+    if(CodeSession.isHost){
+      CodeSocket.socketEmit("End Session", ChatRoomPanel.getChatRoomId(CodeSession._chatRoom));
+    }
+    CodeHelper.endHelper();
+    CodeSocket.endCodeSession();
   }
 
   async joinSession(context: vscode.ExtensionContext, chatRoom: IChatRoom): Promise<boolean>{
@@ -133,7 +145,7 @@ export class CodeSession {
           CodeSession.filepath = `${this.storagePath}/${file.name}.tar.gz`
           fs.writeFileSync(CodeSession.filepath, file.data, {encoding: null});
           if(await this.loadWorkspace()){
-            context.globalState.update('codeRoom', chatRoom)
+            await context.globalState.update('codeRoom', {chatRoom: chatRoom, filepath: CodeSession.filepath})
             await vscode.commands.executeCommand(
               'vscode.openFolder', 
               vscode.Uri.file(CodeSession.filepath.replace(".tar.gz", "")),{forceReuseWindow: true});
@@ -195,8 +207,9 @@ export class CodeHelper{
       }, null, this.context.subscriptions));
 
     CodeHelper._disposables.push(vscode.window.onDidChangeTextEditorSelection(event => {
-      if(CodeHelper.activeEditor === event.textEditor){
-        CodeSocket.socketEmit("send selection change", roomid, event.selections[0].start, 
+      let workspaceFolders = vscode.workspace.workspaceFolders;
+      if(CodeHelper.activeEditor === event.textEditor && workspaceFolders){
+        CodeSocket.socketEmit("send selection change", roomid, event.textEditor.document.uri.path.replace(workspaceFolders[0].uri.path, "").replace(/^\/+/, ''), event.selections[0].start, 
           event.selections[0].end, this.context.globalState.get<IUser>('userAuth')?.name);
       }
     }, null, this.context.subscriptions));
@@ -204,17 +217,22 @@ export class CodeHelper{
     CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
       if(CodeHelper.activeEditor?.document === event.document){
 
+        if(CodeHelper.socketChanges.length >=20){
+          CodeHelper.socketChanges.splice(0,10);
+        }
         for(let change of event.contentChanges){
+          let isSameEdit: boolean = false;
           for(var i = 0; i < CodeHelper.socketChanges.length; i++){
             const item = CodeHelper.socketChanges[i];
-
             if(item.range.isEqual(change.range) && item.text === change.text){
               CodeHelper.socketChanges.splice(i,1);
-              return;
+              isSameEdit = true;
+              break;
             }
           }
-          if(!CodeHelper.readOnly){
-            CodeSocket.socketEmit("send file change", roomid, JSON.stringify(change));
+          let workspaceFolders = vscode.workspace.workspaceFolders;
+          if(!isSameEdit && !CodeHelper.readOnly && workspaceFolders){
+            CodeSocket.socketEmit("send file change", roomid, event.document.uri.path.replace(workspaceFolders[0].uri.path, "").replace(/^\/+/, ''), JSON.stringify(change));
           }
         }
 
@@ -239,29 +257,27 @@ export class CodeHelper{
       Array.from(CodeHelper.selections, ([hoverMessage, range]) => ({ hoverMessage, range })));
   }
 
-  public static updateSelections(start: vscode.Position, end: vscode.Position, user: string){
-    CodeHelper.selections.set(user, new vscode.Range(start, end));
-    CodeHelper.updateDecorations();
+  public static updateSelections(file: string, start: vscode.Position, end: vscode.Position, user: string){
+    let workspaceFolders = vscode.workspace.workspaceFolders;
+    if(this.activeEditor && workspaceFolders && this.activeEditor.document.uri.path.replace(workspaceFolders[0].uri.path, "").replace(/^\/+/, '') === file){
+      CodeHelper.selections.set(user, new vscode.Range(start, end));
+      CodeHelper.updateDecorations();
+    }
   }
 
-  public static async updateFile(change: vscode.TextDocumentContentChangeEvent){
+  public static async updateFile(file: string, change: vscode.TextDocumentContentChangeEvent){
     if (!this.activeEditor) {
       return;
     }
-    if(CodeHelper.readOnly){
-      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorWriteableInSession')
-      this.activeEditor.edit(editBuilder => {
-          editBuilder.replace(change.range, change.text);
-          CodeHelper.socketChanges.push(change);
-      
-      });
-      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
-    } else{
-      this.activeEditor.edit(editBuilder => {
-        editBuilder.replace(change.range, change.text);
-        CodeHelper.socketChanges.push(change);
-    
-      });
+    let workspaceFolders = vscode.workspace.workspaceFolders;
+    if(workspaceFolders){
+      let _file = await vscode.workspace.findFiles(file);
+      let _fileOpen = await vscode.workspace.openTextDocument(`${workspaceFolders[0].uri.path}/${file}`);
+
+      let edit = new vscode.WorkspaceEdit();
+      edit.replace(_file[0], change.range, change.text)
+      vscode.workspace.applyEdit(edit)
+      CodeHelper.socketChanges.push(change);
     }
   }
 
