@@ -47,8 +47,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	if(joinedCodeSession){
 		codeSocket.startSocketIO()
 		CodeSession.setFilePath(joinedCodeSession.filepath)
-		vscode.commands.executeCommand('sdct.openCodeSession', joinedCodeSession);
-		CodeSocket.socketEmit("join code session", ChatRoomPanel.getChatRoomId(joinedCodeSession.chatRoom));
+		vscode.commands.executeCommand('sdct.openCodeSession', joinedCodeSession.chatRoom);
+		CodeSocket.socketEmit("join code session", CodeSessionPanel.getCodeSessionRoomId(joinedCodeSession.chatRoom));
 		await context.globalState.update('codeRoom', undefined);
 	}
 	const chatListProvider = new ChatListProvider(context, backendAPI);
@@ -314,7 +314,6 @@ export async function activate(context: vscode.ExtensionContext) {
 export function deactivate(context: vscode.ExtensionContext) {
 	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
 	if(joinedCodeSession){
-		
 	} 
 	vscode.commands.executeCommand('sdct.endVoiceChat');
 	CodeSession.endCodeSession();
