@@ -164,6 +164,10 @@ export class CodeSocket{
             CodeSocket.socket.on("readOnly", async (readOnly)=>{
                 await CodeHelper.updateReadOnly(readOnly);
             })
+
+            CodeSocket.socket.on("End Session", ()=>{
+               CodeSession.endCodeSession();
+            })
         }else{
             console.log("No socket")
         }

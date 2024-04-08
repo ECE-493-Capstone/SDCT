@@ -120,16 +120,18 @@ export class CodeSession {
     if(CodeSession.filepath){
       fs.unlink(CodeSession.filepath, (err: any) => {
             if (err) throw err //handle your error the way you want to;
-            console.log('path/file.txt was deleted');//or else the file will be deleted
+            console.log('file was deleted');//or else the file will be deleted
           });
       fs.unlink(CodeSession.filepath.replace(".tar.gz", ""), (err: any) => {
         if (err) throw err //handle your error the way you want to;
-        console.log('path/file.txt was deleted');//or else the file will be deleted
+        console.log('file was deleted');//or else the file will be deleted
       });
 
     }
     if(CodeSession.isHost){
       CodeSocket.socketEmit("End Session", ChatRoomPanel.getChatRoomId(CodeSession._chatRoom));
+    } else{
+      vscode.commands.executeCommand('workbench.action.closeFolder');
     }
     CodeHelper.endHelper();
     CodeSocket.endCodeSession();
@@ -159,7 +161,6 @@ export class CodeSession {
         }
       });
       return false;
-      //this.startDecorator();
   }
 }
 
