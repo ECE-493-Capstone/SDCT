@@ -3,9 +3,10 @@ import { Server } from "socket.io"
 import { createServer, Server as httpServer } from "http";
 import { AddressInfo } from 'net'
 import { EMessageType } from '../enums/EMessageType'
-import { CodeHelper } from '../services/CodeSession'
+import { CodeHelper, CodeSession } from '../services/CodeSession'
 
 import * as vscode from "vscode"
+import { CodeSessionPanel } from "../panels/CodeSessionPanel";
 
 export class ChatSocket{
     private static socket: Socket | undefined;
@@ -52,6 +53,15 @@ export class ChatSocket{
     public static socketEmit(command: string, ...args: any[]){
         if(ChatSocket.socket){
             ChatSocket.socket.emit(command, ...args)
+        } else{
+            console.log("No socket")
+        }
+    }
+
+    public static endSocket(){
+        if(ChatSocket.socket){
+            ChatSocket.socket.close();
+            console.log("Closed");
         } else{
             console.log("No socket")
         }
@@ -113,7 +123,7 @@ export class VoiceSocket{
 
 export class CodeSocket{
     private static socket: Socket | undefined;
-
+    private static isHost: boolean = false;
     constructor(socketUrl: string, socketPort: number){
         CodeSocket.socket = io(`${socketUrl}:${socketPort}/code`, { autoConnect: false });
     }
@@ -134,7 +144,7 @@ export class CodeSocket{
                 CodeHelper.updateSelections(start, end, user);
             });
 
-            CodeSocket.socket.on("get file change", (changes) => {
+            CodeSocket.socket.on("get file change", async (changes) => {
                 const _changes = JSON.parse(changes);
                 
                 const documentChange: vscode.TextDocumentContentChangeEvent = {
@@ -149,8 +159,14 @@ export class CodeSocket{
                 };
                     
 
-                CodeHelper.updateFile(documentChange);
+                await CodeHelper.updateFile(documentChange);
             });
+
+            CodeSocket.socket.on("readOnly", async (readOnly)=>{
+                await CodeHelper.updateReadOnly(readOnly);
+            })
+
+            CodeSocket.isHost = true;
         }else{
             console.log("No socket")
         }

@@ -163,21 +163,32 @@ export class CodeHelper{
   private static selections: Map<string, vscode.Range> = new Map();
   private static _disposables: vscode.Disposable[] = [];
   private static socketChanges: vscode.TextDocumentContentChangeEvent[] = [];
+  private static readOnly: boolean = false;
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
   }
 
   start(roomid: string){
-    CodeHelper._disposables.push(vscode.window.onDidChangeActiveTextEditor(editor => {
+    CodeHelper._disposables.push(vscode.window.onDidChangeActiveTextEditor(async editor => {
       CodeHelper.activeEditor = editor;
       if (editor) {
         CodeHelper.updateDecorations();
+        if(CodeHelper.readOnly){
+          await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+        } else{
+          await vscode.commands.executeCommand('workbench.action.files.setActiveEditorWriteableInSession')
+        }
       }
     }, null, this.context.subscriptions));
   
-    CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
+    CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(async event => {
         if (CodeHelper.activeEditor && event.document === CodeHelper.activeEditor.document) {
+          if(CodeHelper.readOnly){
+            await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+          } else{
+            await vscode.commands.executeCommand('workbench.action.files.setActiveEditorWriteableInSession')
+          }
           CodeHelper.selections.clear();
           CodeHelper.updateDecorations();
         }
@@ -202,14 +213,16 @@ export class CodeHelper{
               return;
             }
           }
-          CodeSocket.socketEmit("send file change", roomid, JSON.stringify(change));
+          if(!CodeHelper.readOnly){
+            CodeSocket.socketEmit("send file change", roomid, JSON.stringify(change));
+          }
         }
 
       }
     }, null, this.context.subscriptions));
   }
 
-  stopListeners(){
+  public static endHelper(){
     while (CodeHelper._disposables.length) {
       const disposable = CodeHelper._disposables.pop();
       if (disposable) {
@@ -235,10 +248,30 @@ export class CodeHelper{
     if (!this.activeEditor) {
       return;
     }
-    this.activeEditor.edit(editBuilder => {
+    if(CodeHelper.readOnly){
+      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorWriteableInSession')
+      this.activeEditor.edit(editBuilder => {
+          editBuilder.replace(change.range, change.text);
+          CodeHelper.socketChanges.push(change);
+      
+      });
+      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+    } else{
+      this.activeEditor.edit(editBuilder => {
         editBuilder.replace(change.range, change.text);
         CodeHelper.socketChanges.push(change);
-    });
+    
+      });
+    }
+  }
+
+  public static async updateReadOnly(readOnly: boolean){
+    CodeHelper.readOnly = readOnly;
+    if(CodeHelper.readOnly){
+      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
+    } else{
+      await vscode.commands.executeCommand('workbench.action.files.setActiveEditorWriteableInSession')
+    }
   }
 }
 
