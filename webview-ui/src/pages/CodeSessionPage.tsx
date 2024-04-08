@@ -12,6 +12,7 @@ function CodeSessionPage({chatRoom}: {chatRoom: IChatRoom}) {
   };
 
   const handleReadOnly= () => {
+    vscode.postMessage({command: 'readOnly', chatRoom, isReadOnly: !isReadOnly});
     setIsReadOnly(!isReadOnly);
   };
 

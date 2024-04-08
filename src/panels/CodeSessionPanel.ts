@@ -4,6 +4,7 @@ import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
 import { EPage } from "../enums/EPage";
 import { CodeSession } from "../services/CodeSession";
+import { CodeSocket } from "../backend/BackendSocket";
 
 export class CodeSessionPanel {
   public static currentPanels: Map<string, CodeSessionPanel> = new Map();
@@ -175,6 +176,10 @@ export class CodeSessionPanel {
             break;
           case "openWhiteboard":
             commands.executeCommand("sdct.openWhiteboard", message.chatRoom);
+            break;
+          case "readOnly":
+            let chatRoom: IChatRoom = message.chatRoom;
+            CodeSocket.socketEmit("readOnly", CodeSessionPanel.getCodeSessionRoomId(chatRoom), message.isReadOnly);
             break;
         }
       },

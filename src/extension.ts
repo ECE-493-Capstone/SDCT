@@ -195,9 +195,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	const startCodeSessionDisposable = vscode.commands.registerCommand("sdct.startCodeSession", async (chatRoom: IChatRoom) => {
 		codeSocket.startSocketIO();
 		if(await codeSession.startSession(chatRoom)){
+			vscode.commands.executeCommand('sdct.openCodeSession', chatRoom);
 			const panel = CodeSessionPanel.getPanel(CodeSessionPanel.getCodeSessionRoomId(chatRoom));
 			panel?.webview.postMessage({command: "host"});
-			vscode.commands.executeCommand('sdct.openCodeSession', chatRoom);
 		} else{
 			console.log("Failed to start codesession")
 		}
@@ -308,4 +308,12 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate(context: vscode.ExtensionContext) {
+	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
+	if(joinedCodeSession){
+		
+	} 
+	vscode.commands.executeCommand('sdct.endVoiceChat');
+	CodeSocket.endCodeSession();
+	ChatSocket.endSocket();
+}
