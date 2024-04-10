@@ -314,8 +314,8 @@ export async function activate(context: vscode.ExtensionContext) {
 export function deactivate(context: vscode.ExtensionContext) {
 	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
 	if(joinedCodeSession){
+		CodeSession.endCodeSession();
 	} 
 	vscode.commands.executeCommand('sdct.endVoiceChat');
-	CodeSession.endCodeSession();
 	ChatSocket.endSocket();
 }

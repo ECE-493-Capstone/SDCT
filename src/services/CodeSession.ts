@@ -69,20 +69,6 @@ export class CodeSession {
     }
   }
 
-  private async loadWorkspace(): Promise<boolean>{
-    if(vscode.workspace.name){
-      vscode.window.showErrorMessage('Please Close Existing Workspace');
-      return false;
-    } else {
-      if(CodeSession.filepath){
-        await this.extractWorkspace()
-      }
-
-    }
-
-    return true;
-  }
-
   async startSession(chatRoom: IChatRoom): Promise<boolean>{
     await this.archiveWorkspace();
 		if(CodeSession.filepath === undefined){
@@ -107,7 +93,6 @@ export class CodeSession {
         resolve(false);
 		  })
     });
-    //this.startDecorator();
   }
 
   getSessionFile(){
@@ -128,9 +113,7 @@ export class CodeSession {
       });
 
     }
-    if(CodeSession.isHost){
-      CodeSocket.socketEmit("End Session", ChatRoomPanel.getChatRoomId(CodeSession._chatRoom));
-    } else{
+    if(!CodeSession.isHost && CodeSession.filepath){
       vscode.commands.executeCommand('workbench.action.closeFolder');
     }
     CodeHelper.endHelper();
@@ -144,16 +127,21 @@ export class CodeSession {
           vscode.window.showErrorMessage("No Codesession for this room");
           CodeSession.endCodeSession();
         } else if (response === "joined"){
-          CodeSession.filepath = `${this.storagePath}/${file.name}.tar.gz`
-          fs.writeFileSync(CodeSession.filepath, file.data, {encoding: null});
-          if(await this.loadWorkspace()){
-            await context.globalState.update('codeRoom', {chatRoom: chatRoom, filepath: CodeSession.filepath})
-            await vscode.commands.executeCommand(
-              'vscode.openFolder', 
-              vscode.Uri.file(CodeSession.filepath.replace(".tar.gz", "")),{forceReuseWindow: true});
-            return true;
-          } else{
+          if(vscode.workspace.name){
+            vscode.window.showErrorMessage('Please Close Existing Workspace');
             CodeSession.endCodeSession();
+            return false;
+          } else {
+            CodeSession.filepath = `${this.storagePath}/${file.name}.tar.gz`
+            fs.writeFileSync(CodeSession.filepath, file.data, {encoding: null});
+            if(CodeSession.filepath){
+              await this.extractWorkspace()
+              await context.globalState.update('codeRoom', {chatRoom: chatRoom, filepath: CodeSession.filepath})
+              await vscode.commands.executeCommand(
+                'vscode.openFolder', 
+                vscode.Uri.file(CodeSession.filepath.replace(".tar.gz", "")),{forceReuseWindow: true});
+              return true;
+            }
           }
           return false;
         } else{
@@ -186,6 +174,7 @@ export class CodeHelper{
     CodeHelper._disposables.push(vscode.window.onDidChangeActiveTextEditor(async editor => {
       CodeHelper.activeEditor = editor;
       if (editor) {
+        CodeHelper.selections.clear();
         CodeHelper.updateDecorations();
         if(CodeHelper.readOnly){
           await vscode.commands.executeCommand('workbench.action.files.setActiveEditorReadonlyInSession')
@@ -218,7 +207,7 @@ export class CodeHelper{
     CodeHelper._disposables.push(vscode.workspace.onDidChangeTextDocument(event => {
       if(CodeHelper.activeEditor?.document === event.document){
 
-        if(CodeHelper.socketChanges.length >=20){
+        if(CodeHelper.socketChanges.length >=50){
           CodeHelper.socketChanges.splice(0,10);
         }
         for(let change of event.contentChanges){
@@ -267,9 +256,6 @@ export class CodeHelper{
   }
 
   public static async updateFile(file: string, change: vscode.TextDocumentContentChangeEvent){
-    if (!this.activeEditor) {
-      return;
-    }
     let workspaceFolders = vscode.workspace.workspaceFolders;
     if(workspaceFolders){
       let _file = await vscode.workspace.findFiles(file);
