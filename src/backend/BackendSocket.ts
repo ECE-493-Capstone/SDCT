@@ -8,6 +8,7 @@ import { CodeHelper, CodeSession } from '../services/CodeSession'
 import * as vscode from "vscode"
 import { VoiceChatPanel } from "../panels/VoiceChatPanel";
 import { IUser } from "../interfaces/IUser";
+import { BackendAPI } from "./BackendAPI";
 
 export class ChatSocket{
     private static socket: Socket | undefined;

@@ -55,10 +55,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.createTreeView('chatList', {
 		treeDataProvider: chatListProvider
 	});
+	const notificationInterval = setInterval(chatListProvider.notificationUpdate.bind(chatListProvider), 5000);
+
 	const profileProvider = new ProfileProvider(context);
 	vscode.window.createTreeView('profile', {
 		treeDataProvider: profileProvider
 	});
+
 	const user = context.globalState.get<IUser>('userAuth')
 	if(user){
 		chatSocket.startSocketIO();
@@ -138,6 +141,12 @@ export async function activate(context: vscode.ExtensionContext) {
 			groupId: chat.groupId
 		};
 		
+		if(chatRoom.groupId){
+			backendAPI.clearGroupNotifications(chatRoom.groupId)
+		} else{
+			backendAPI.clearFriendNotifications(chatRoom.name)
+		}
+
 		if(ChatRoomPanel.currentPanels.has(ChatRoomPanel.getChatRoomId(chatRoom))){
 			ChatRoomPanel.render(context.extensionUri, chatRoom);
 			return;
@@ -234,21 +243,53 @@ export async function activate(context: vscode.ExtensionContext) {
 	const sendChatMessageDisposable = vscode.commands.registerCommand("sdct.sendChatMessage", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "chat", message, chatRoom});
+
+		if(panel){
+			if(chatRoom.groupId){
+				backendAPI.clearGroupNotifications(chatRoom.groupId)
+			} else{
+				backendAPI.clearFriendNotifications(chatRoom.user.name)
+			}
+		}
 	});
 
 	const sendMediaDisposable = vscode.commands.registerCommand("sdct.sendMedia", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "media", message, chatRoom});
+
+		if(panel){
+			if(chatRoom.groupId){
+				backendAPI.clearGroupNotifications(chatRoom.groupId)
+			} else{
+				backendAPI.clearFriendNotifications(chatRoom.user.name)
+			}
+		}
 	});
 
 	const sendFileDisposable = vscode.commands.registerCommand("sdct.sendFile", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "file", message, chatRoom});
+
+		if(panel){
+			if(chatRoom.groupId){
+				backendAPI.clearGroupNotifications(chatRoom.groupId)
+			} else{
+				backendAPI.clearFriendNotifications(chatRoom.user.name)
+			}
+		}
 	});
 
 	const sendCodeMessageDisposable = vscode.commands.registerCommand("sdct.sendCodeMessage", (chatRoom: IChatRoom, message: IMessage) => {
 		const panel = ChatRoomPanel.getPanel(ChatRoomPanel.getChatRoomId(chatRoom));
 		panel?.webview.postMessage({command: "code", message, chatRoom});
+
+		if(panel){
+			if(chatRoom.groupId){
+				backendAPI.clearGroupNotifications(chatRoom.groupId)
+			} else{
+				backendAPI.clearFriendNotifications(chatRoom.user.name)
+			}
+		}
 	});
 
 	const handleUserCodeMessageDisposable = vscode.commands.registerCommand("sdct.handleUserCodeMessage", (chatRoom: IChatRoom, language: string) => {
@@ -307,7 +348,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		handleUserCodeMessageDisposable,
 		sendCodeMessageDisposable,
 		muteVoiceChatDisposable,
-		endVoiceChatDisposable
+		endVoiceChatDisposable,
+		openWhiteboardDisposable
 	);
 }
 
