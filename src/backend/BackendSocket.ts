@@ -108,7 +108,6 @@ export class VoiceSocket{
 
         this.httpServer.listen(0);
         this.socket.emit("join private voice", roomid, user, (friends: any) => {
-            console.log(friends);
 			const panel = VoiceChatPanel.getPanel(roomid);
 			panel?.webview.postMessage({command: "updateFriends", friends});
         })
