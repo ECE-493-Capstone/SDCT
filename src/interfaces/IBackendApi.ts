@@ -37,7 +37,7 @@ export interface IApiGroup{
 }
 
 export interface IApiMessage{
-    MessageId:12,
+    MessageId: number,
     SendId: string,
     RecvId: string,
     MessageType: string,
@@ -45,4 +45,17 @@ export interface IApiMessage{
     MessageText: string,
     MessageLoc: string,
     ImageURL: string
+    GroupName?: string,
+}
+
+export interface IApiFriendNotification{
+    UserId: string,
+    FriendId: string,
+    NotifCount: number,
+}
+
+export interface IApiGroupNotification{
+    UserId: string,
+    GroupId: string,
+    NotifCount: number,
 }

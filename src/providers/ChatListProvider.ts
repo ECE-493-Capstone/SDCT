@@ -26,6 +26,45 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     this._onDidChangeTreeData.fire();
   }
 
+  async notificationUpdate(): Promise<void>{
+    if(this.authenticated && this.backendApi && this.data){
+      const friendNotif = await this.backendApi.getFriendNotifications();
+      const groupNotif = await this.backendApi.getGroupNotifications();
+      const friendLastMsg = await this.backendApi.getFriendLastChats();
+      const groupLastMsg = await this.backendApi.getGroupLastChats();
+
+      for (var i = 0; i < this.data.length; i++){
+        const oldItem = this.data[i];
+        if(oldItem.friendId){
+          const notif = friendNotif.get(oldItem.name);
+          if(notif){
+            this.data[i].notificationCount = notif.NotifCount;
+          } else{
+            this.data[i].notificationCount = 0;
+          }
+
+          const lastMessage = friendLastMsg.get(oldItem.name);
+          if(lastMessage){
+            this.data[i].lastMessage = lastMessage.MessageText;
+          }
+        } else if(oldItem.groupId){
+          const notif = groupNotif.get(oldItem.groupId);
+          if(notif){
+            this.data[i].notificationCount = notif.NotifCount;
+          } else{
+            this.data[i].notificationCount = 0;
+          }
+
+          const lastMessage = groupLastMsg.get(oldItem.name);
+          if(lastMessage){
+            this.data[i].lastMessage = lastMessage.MessageText;
+          }
+        }
+      }
+      this._onDidChangeTreeData.fire();
+    }
+  }
+
   constructor(context: vscode.ExtensionContext, backendApi: BackendAPI) {
     this.authenticated = !!context.globalState.get<IUser>('userAuth');
     this.backendApi = backendApi;
@@ -35,12 +74,6 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
     const treeItem = new vscode.TreeItem(element.name);
     if (element.notificationCount > 0) {
       treeItem.label += ` ${this.getNotificationCountSymbol(element.notificationCount)}`;
-    }
-    if (element.voiceChatActive) {
-      treeItem.label += ' 🎤';
-    }
-    if (element.codeSessionActive) {
-      treeItem.label += ' 💻';
     }
     treeItem.iconPath = vscode.Uri.parse(element.pictureUri);
     treeItem.description = element.lastMessage;
