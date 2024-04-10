@@ -16,7 +16,6 @@ export async function chatMenu(chatRoom: IChatRoom) {
     ];
     if (chatRoom.groupId) {
         options.push("Leave Group");
-        options.push("See Group Members");
     }
 
     if (!chatRoom.joinedVoiceChat) {
@@ -44,8 +43,6 @@ export async function chatMenu(chatRoom: IChatRoom) {
             startCodeSession(chatRoom);
         } else if (chosenOption === "Join Code Session") {
             joinCodeSession(chatRoom);
-        } else if (chosenOption === "See Group Members") {
-            await showGroupMembers(chatRoom);
         }
     }
 }
@@ -121,11 +118,6 @@ const joinCodeSession = (chatRoom: IChatRoom) => {
     }
 
     vscode.commands.executeCommand("sdct.joinCodeSession", chatRoom);
-};
-
-
-const showGroupMembers = async (chatRoom: IChatRoom) => {
-    vscode.window.showQuickPick(chatRoom.friends.map(friend => friend.name));
 };
 
 const leaveGroup = (chatRoom: IChatRoom) => {

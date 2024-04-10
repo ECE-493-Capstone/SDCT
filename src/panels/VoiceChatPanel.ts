@@ -34,7 +34,7 @@ export class VoiceChatPanel {
 
   public static getVoiceChatName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
-      const groupName = `VC: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
+      const groupName = `VC: ${chatRoom.name}`; // FETCH ACTUAL GROUP NAME
       return groupName;
     } else {
       return chatRoom.friends[0].name;

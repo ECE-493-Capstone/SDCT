@@ -127,12 +127,6 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (chat.friendId) {
 			const friend: IFriend = { name: chat.name, friendid: chat.friendId,pictureUri: chat.pictureUri };
 			friends.push(friend);
-		} else {
-			
-			// for (let i = 0; i < 3; i++) { // MOCK DATA
-			// 	const friend: IFriend = { name: `Member ${i}`, pictureUri: `https://picsum.photos/seed/${i+1}/200/200` };
-			// 	friends.push(friend);
-			// }
 		}
 		const chatRoom: IChatRoom = {
 			name: chat.name,
