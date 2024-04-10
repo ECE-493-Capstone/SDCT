@@ -21,15 +21,20 @@ function App() {
           setPage(message.page);
           break;
         case 'initChatRoom':
-          console.log(message.chatRoom)
           setChatRoom(message.chatRoom);
+          break;
+        case 'updateFriends':
+          let newChatRoom = structuredClone(chatRoom)
+          newChatRoom.friends = message.friends;
+          console.log(message.friends)
+          setChatRoom(newChatRoom);
           break;
       };
     }
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [chatRoom]);
 
   return (
     <main>

@@ -6,7 +6,8 @@ import { EMessageType } from '../enums/EMessageType'
 import { CodeHelper, CodeSession } from '../services/CodeSession'
 
 import * as vscode from "vscode"
-import { CodeSessionPanel } from "../panels/CodeSessionPanel";
+import { VoiceChatPanel } from "../panels/VoiceChatPanel";
+import { IUser } from "../interfaces/IUser";
 
 export class ChatSocket{
     private static socket: Socket | undefined;
@@ -85,7 +86,10 @@ export class VoiceSocket{
         this.socket.on("get voice chat", (data) => {
             this.io.emit("get voice chat", data);
         });
-
+        this.socket.on("update friends", (roomid: any, friends: any) => {
+			const panel = VoiceChatPanel.getPanel(roomid);
+			panel?.webview.postMessage({command: "updateFriends", friends});
+        })
         this.httpServer = createServer();
         this.io = new Server(this.httpServer, {});
         this.io.on("connection", (socket) => {
@@ -99,11 +103,15 @@ export class VoiceSocket{
     }
 
     
-    startVoiceChat(roomid: string){
+    startVoiceChat(roomid: string, user: IUser){
         this.socket.connect();
 
         this.httpServer.listen(0);
-        this.socket.emit("join private voice", roomid)
+        this.socket.emit("join private voice", roomid, user, (friends: any) => {
+            console.log(friends);
+			const panel = VoiceChatPanel.getPanel(roomid);
+			panel?.webview.postMessage({command: "updateFriends", friends});
+        })
     }
     
     muteVoiceChat(){

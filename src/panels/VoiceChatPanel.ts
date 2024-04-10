@@ -14,6 +14,24 @@ export class VoiceChatPanel {
     return this._panel;
   }
 
+  public static getPanel(voiceRoomId: string): WebviewPanel | undefined {
+    const panel = VoiceChatPanel.currentPanels.get(voiceRoomId);
+    if (!!panel) {
+      return panel._panel;
+    }
+    return undefined;
+  }
+
+  public static getVoiceChatId(voiceChatRoom: IChatRoom): string {
+    if(voiceChatRoom.groupId){
+      return voiceChatRoom.groupId;
+    } else if(voiceChatRoom.friendId){
+      return voiceChatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
+    }
+  }
+
   public static getVoiceChatName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
       const groupName = `VC: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
@@ -51,7 +69,7 @@ export class VoiceChatPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    const chatRoomId = VoiceChatPanel.getVoiceChatId(chatRoom);
     if (VoiceChatPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
       const panel = VoiceChatPanel.currentPanels.get(chatRoomId);

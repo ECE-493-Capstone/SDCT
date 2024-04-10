@@ -185,7 +185,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		chatListProvider.setData(chatRooms);
 		VoiceChatPanel.render(context.extensionUri, chatRoom);
 
-		voiceSocket.startVoiceChat(chatRoomId);
+		voiceSocket.startVoiceChat(chatRoomId, chatRoom.user);
 
 		voiceSession = spawn('python3',["src/python/audio_socketio.py", voiceSocket.getSocketInfo(), chatRoomId], {cwd: context.extensionPath});
 		voiceSession.stdout.on("data", (data) => {
