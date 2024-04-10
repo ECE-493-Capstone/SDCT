@@ -107,7 +107,15 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', async () => {
-		manageAccount(backendAPI);
+		await manageAccount(backendAPI);
+		await chatListProvider.refresh(context);
+	});
+
+	const leaveGroupDisposable = vscode.commands.registerCommand('sdct.leaveGroup', async (groupId: string) => {
+		if(groupId){
+			await backendAPI.leaveGroup(groupId)
+			await chatListProvider.refresh(context);
+		}
 	});
 
 	const openChatRoomDisposable = vscode.commands.registerCommand("sdct.openChatRoom", async (chat: IChat) => {
@@ -292,6 +300,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		logoutDisposable, 
 		searchChatDisposable, 
 		manageAccountDisposable, 
+		leaveGroupDisposable,
 		openChatRoomDisposable, 
 		openChatRoomMenuDisposable, 
 		openVoiceChatDisposable,

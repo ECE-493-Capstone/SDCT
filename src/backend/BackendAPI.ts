@@ -294,4 +294,13 @@ export class BackendAPI {
 
         return messageList;
     }
+
+    async leaveGroup(groupId: string): Promise<boolean>{
+        const apiData = await this.postRequest(`/decline_invite_group`, {GroupId: groupId, UserId: this.userID});
+        if(apiData){
+            return true;
+        }
+
+        return false;
+    }
 }
