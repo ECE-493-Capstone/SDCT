@@ -107,8 +107,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	const manageAccountDisposable = vscode.commands.registerCommand('sdct.manageAccount', async () => {
-		let _file = await vscode.workspace.findFiles(`src/flask/json/provider.py`);
-		console.log(_file)
 		manageAccount(backendAPI);
 	});
 
@@ -312,10 +310,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate(context: vscode.ExtensionContext) {
-	const joinedCodeSession = context.globalState.get<IChatRoom>('codeRoom');
-	if(joinedCodeSession){
-		CodeSession.endCodeSession();
-	} 
+	CodeSession.endCodeSession();
 	vscode.commands.executeCommand('sdct.endVoiceChat');
 	ChatSocket.endSocket();
 }
