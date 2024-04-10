@@ -26,7 +26,6 @@ function App() {
         case 'updateFriends':
           let newChatRoom = structuredClone(chatRoom)
           newChatRoom.friends = message.friends;
-          console.log(message.friends)
           setChatRoom(newChatRoom);
           break;
       };
