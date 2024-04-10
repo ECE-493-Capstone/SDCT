@@ -1,23 +1,11 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { ChatRoomPanel } from '../panels/ChatRoomPanel';
+import { VoiceChatPanel } from '../panels/VoiceChatPanel';
 import { IMessage } from '../interfaces/IMessage';
 import { EMessageType } from '../enums/EMessageType';
 import { IChatRoom } from '../interfaces/IChatRoom';
 
-suite('ChatRoomPanel Test Suite', () => {
-    test('sendChatMessage', () => {
-        const message: IMessage = {
-            content: "test",
-            sender: {
-                name: "test",
-                pictureUri: "test",
-            },
-            timestamp: new Date(),
-            type: EMessageType.Text,
-        };
-		ChatRoomPanel.sendChatMessage("test", message);
-	});
+suite('VoiceChatPanel test', () => {
     test('render()', () => {
         const chatRoom: IChatRoom = {
             name: "Test Chat Room",
@@ -37,6 +25,6 @@ suite('ChatRoomPanel Test Suite', () => {
             friendId: "123"
         };
         const uri = vscode.Uri.parse("https://www.google.com");
-        ChatRoomPanel.render(uri, chatRoom);
+        VoiceChatPanel.render(uri, chatRoom);
     });
 });
