@@ -19,7 +19,7 @@ export async function manageAccount(api: BackendAPI) {
     }
 }
 
-async function addFriend(api: BackendAPI) {
+export async function addFriend(api: BackendAPI) {
     const username = await vscode.window.showInputBox({ prompt: "Enter username" });
     if (!!username) {
         if(await api.addFriend(username)){
@@ -30,7 +30,7 @@ async function addFriend(api: BackendAPI) {
     }
 }
 
-async function createGroup(api: BackendAPI) {
+export async function createGroup(api: BackendAPI) {
     const groupName = await vscode.window.showInputBox({ prompt: "Enter group name" });
     if (!!groupName) {
         const groupId = await api.createGroup(groupName);
@@ -53,7 +53,7 @@ async function createGroup(api: BackendAPI) {
     }
 }
 
-async function acceptInvites(api: BackendAPI) {
+export async function acceptInvites(api: BackendAPI) {
     const inviteData = await api.getInvites();
     const acceptInvites = await vscode.window.showQuickPick(inviteData.map(function(item){return item.name.toString()}), { canPickMany: true });
     if (!!acceptInvites) {
@@ -71,7 +71,7 @@ async function acceptInvites(api: BackendAPI) {
     }
 }
 
-async function declineInvites(api: BackendAPI) {
+export async function declineInvites(api: BackendAPI) {
     const inviteData = await api.getInvites();
     const declineInvites = await vscode.window.showQuickPick(inviteData.map(function(item){return item.name.toString()}), { canPickMany: true });
     if (!!declineInvites) {
