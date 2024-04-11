@@ -14,9 +14,8 @@ export async function chatMenu(chatRoom: IChatRoom) {
         "Send File", 
         "Send Code Message"
     ];
-    if (chatRoom.friends.length > 1) {
+    if (chatRoom.groupId) {
         options.push("Leave Group");
-        options.push("See Group Members");
     }
 
     if (!chatRoom.joinedVoiceChat) {
@@ -36,6 +35,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
         } else if (chosenOption === "Send Code Message") {
             await handleUserCodeMessage(chatRoom);
         } else if (chosenOption === "Leave Group") {
+            leaveGroup(chatRoom);
             return;
         } else if (chosenOption === "Join Voice Chat") {
             joinVoiceChat(chatRoom);
@@ -43,8 +43,6 @@ export async function chatMenu(chatRoom: IChatRoom) {
             startCodeSession(chatRoom);
         } else if (chosenOption === "Join Code Session") {
             joinCodeSession(chatRoom);
-        } else if (chosenOption === "See Group Members") {
-            await showGroupMembers(chatRoom);
         }
     }
 }
@@ -122,7 +120,6 @@ export const joinCodeSession = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.joinCodeSession", chatRoom);
 };
 
-
-export const showGroupMembers = async (chatRoom: IChatRoom) => {
-    vscode.window.showQuickPick(chatRoom.friends.map(friend => friend.name));
+export const leaveGroup = (chatRoom: IChatRoom) => {
+    vscode.commands.executeCommand("sdct.leaveGroup", chatRoom.groupId);
 };
