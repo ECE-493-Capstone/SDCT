@@ -19,7 +19,7 @@ export class ChatSocket{
     }
 
     startSocketIO(){
-        if(ChatSocket.socket){
+        if(ChatSocket.socket && !ChatSocket.socket.connected){
             ChatSocket.socket.connect();
             
             ChatSocket.socket.on("connect_error", (err) => {
@@ -106,12 +106,13 @@ export class VoiceSocket{
 
     
     startVoiceChat(roomid: string, user: IUser){
-        this.socket.connect();
-
+        if(!this.socket.connected){
+            this.socket.connect();
+        }
         this.httpServer.listen(0);
         this.socket.emit("join private voice", roomid, user, (friends: any) => {
-			const panel = VoiceChatPanel.getPanel(roomid);
-			panel?.webview.postMessage({command: "updateFriends", friends});
+            const panel = VoiceChatPanel.getPanel(roomid);
+            panel?.webview.postMessage({command: "updateFriends", friends});
         })
     }
     
@@ -137,7 +138,7 @@ export class CodeSocket{
     }
 
     startSocketIO(){
-        if(CodeSocket.socket){
+        if(CodeSocket.socket && !CodeSocket.socket.connected){
             CodeSocket.socket.connect();
             
             CodeSocket.socket.on("connect_error", (err) => {
