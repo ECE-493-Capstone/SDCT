@@ -9,6 +9,7 @@ import * as vscode from "vscode"
 import { VoiceChatPanel } from "../panels/VoiceChatPanel";
 import { IUser } from "../interfaces/IUser";
 import { BackendAPI } from "./BackendAPI";
+import { WhiteboardPanel } from "../panels/WhiteboardPanel";
 
 export class ChatSocket{
     private static socket: Socket | undefined;
@@ -175,6 +176,12 @@ export class CodeSocket{
 
             CodeSocket.socket.on("End Session", ()=>{
                CodeSession.endCodeSession();
+            })
+
+            CodeSocket.socket.on("get whiteboardchange", (roomid, change, data)=>{
+                const panel = WhiteboardPanel.getPanel(roomid);
+                console.log(panel, roomid, change, data);
+                panel?.webview.postMessage({command: "get whiteboardchange", change, data}); 
             })
         }else{
             console.log("No socket")

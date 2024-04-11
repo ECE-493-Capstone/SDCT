@@ -20,9 +20,30 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
-    useEffect(() => {
+    useEffect(()=>{
         prepareCanvas();
     }, []);
+
+    useEffect(() => {
+        function handleMessage(event: any) {
+            const message = event.data;
+            switch (message.command) {
+              case 'get whiteboardchange':
+                if(message.change === "start"){
+                    startDrawing(message.data.brushType, message.data.offsetX, message.data.offsetY);
+                } else if(message.change === "draw") {
+                    draw(message.data.offsetX, message.data.offsetY);
+                } else if(message.change === "finishdraw"){
+                    finishDrawing();
+                } else if(message.change === "clearCanvas"){
+                    clearCanvas();
+                }
+                break;
+          };
+        }
+        window.addEventListener('message', handleMessage);
+        return () => window.removeEventListener("message", handleMessage);
+      }, [isDrawing, brushType, textInput]);
 
     const prepareCanvas = () => {
         const canvas = canvasRef.current;
@@ -42,20 +63,19 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         }
     };
 
-    const startDrawing = ({ nativeEvent }: { nativeEvent: any }) => {
-        const { offsetX, offsetY } = nativeEvent;
+    const startDrawing = (_brushType: any, offsetX: any, offsetY: any) => {
         if (contextRef.current) {
-            if (brushType === BrushType.Text) {
+            if (_brushType === BrushType.Text) {
                 contextRef.current.font = "30px Arial";
                 contextRef.current.fillStyle = "white";
                 contextRef.current.fillText(textInput, offsetX, offsetY);
                 return;
-            } else if (brushType === BrushType.Square) {
+            } else if (_brushType === BrushType.Square) {
                 contextRef.current.strokeStyle = "white";
                 contextRef.current.lineWidth = 5;
                 contextRef.current.strokeRect(offsetX, offsetY, 50, 50);
                 return;
-            } else if (brushType === BrushType.Triangle) {
+            } else if (_brushType === BrushType.Triangle) {
                 contextRef.current.strokeStyle = "white";
                 contextRef.current.lineWidth = 5;
                 contextRef.current.beginPath();
@@ -65,7 +85,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.closePath();
                 contextRef.current.stroke();
                 return;
-            } else if (brushType === BrushType.Diamond) {
+            } else if (_brushType === BrushType.Diamond) {
                 contextRef.current.fillStyle = "white";
                 contextRef.current.strokeStyle = "white";
                 contextRef.current.beginPath();
@@ -76,7 +96,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 contextRef.current.closePath();
                 contextRef.current.stroke();
                 return;
-            } else if (brushType === BrushType.Arrow) {
+            } else if (_brushType === BrushType.Arrow) {
                 contextRef.current.strokeStyle = "white";
                 contextRef.current.lineWidth = 5;
                 contextRef.current.beginPath();
@@ -108,9 +128,9 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         setIsDrawing(false);
     };
 
-    const draw = ({ nativeEvent }: { nativeEvent: any }) => {
+    const draw = (offsetX: any, offsetY: any) => {
+        console.log(isDrawing)
         if (!isDrawing) {return;};
-        const { offsetX, offsetY } = nativeEvent;
         if (contextRef.current) {
             contextRef.current.lineTo(offsetX, offsetY);
             contextRef.current.stroke();
@@ -164,12 +184,32 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         setBrushType(BrushType.Arrow);
     };
 
+    const handleStartDraw = ({ nativeEvent }: { nativeEvent: any }) =>  {
+        const { offsetX, offsetY } = nativeEvent
+        if(contextRef.current){
+            vscode.postMessage({command: 'WhiteboardChange',chatRoom, change: "start", data: {brushType, offsetX, offsetY, text: textInput}});
+        }
+    };
+    const handleDraw = ({ nativeEvent }: { nativeEvent: any }) =>  {
+        if (!isDrawing) {return;};
+        const { offsetX, offsetY } = nativeEvent;
+        vscode.postMessage({command: 'WhiteboardChange', chatRoom, change: "draw",data: {offsetX, offsetY}});
+    };
+
+    const handlefinishDraw = () => {
+        vscode.postMessage({command: 'WhiteboardChange',chatRoom, change: "finishdraw", data: {}});
+    };
+
+    const handleClearCanvas = () => {
+        vscode.postMessage({command: 'WhiteboardChange', chatRoom, change: "clearCanvas", data: {}});
+    };
+
     return (
         <main>
             <canvas
-                onMouseDown={startDrawing}
-                onMouseUp={finishDrawing}
-                onMouseMove={draw}
+                onMouseDown={handleStartDraw}
+                onMouseUp={handlefinishDraw}
+                onMouseMove={handleDraw}
                 ref={canvasRef}
                 style={{ border: '2px solid white' }}
             ></canvas>
@@ -181,7 +221,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
                 <VSCodeButton appearance={brushType === BrushType.Diamond ? "primary" : "secondary"} onClick={drawDiamond}>🔶</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Arrow ? "primary" : "secondary"} onClick={drawArrow}>⬆️</VSCodeButton>
                 <VSCodeButton appearance={brushType === BrushType.Eraser ? "primary" : "secondary"} onClick={getEraser}>🧽</VSCodeButton>
-                <VSCodeButton appearance="secondary" onClick={clearCanvas}>🗑️</VSCodeButton>
+                <VSCodeButton appearance="secondary" onClick={handleClearCanvas}>🗑️</VSCodeButton>
             </div>
             {brushType === BrushType.Text && (
                 <VSCodeTextField className="whiteboardTextInput" value={textInput} onInput={e => {

@@ -3,6 +3,7 @@ import { getUri } from "../utilities/getUri";
 import { getNonce } from "../utilities/getNonce";
 import { IChatRoom } from "../interfaces/IChatRoom";
 import { EPage } from "../enums/EPage";
+import { CodeSocket } from "../backend/BackendSocket";
 
 export class WhiteboardPanel {
   public static currentPanels: Map<string, WhiteboardPanel> = new Map();
@@ -14,6 +15,23 @@ export class WhiteboardPanel {
     return this._panel;
   }
 
+  public static getPanel(voiceRoomId: string): WebviewPanel | undefined {
+    const panel = WhiteboardPanel.currentPanels.get(voiceRoomId);
+    if (!!panel) {
+      return panel._panel;
+    }
+    return undefined;
+  }
+
+  public static getWhiteBoardRoomId(chatRoom: IChatRoom): string {
+    if(chatRoom.groupId){
+      return chatRoom.groupId;
+    } else if(chatRoom.friendId){
+      return chatRoom.friendId;
+    }else {
+      throw new Error("ChatRoom has no groupId or friendID");
+    }
+  }
   public static getWhiteboardName(chatRoom: IChatRoom): string {
     if (chatRoom.groupId) {
       const groupName = `W: ${chatRoom.groupId}`; // FETCH ACTUAL GROUP NAME
@@ -51,7 +69,7 @@ export class WhiteboardPanel {
    * @param extensionUri The URI of the directory containing the extension.
    */
   public static render(extensionUri: Uri, chatRoom: IChatRoom) {
-    const chatRoomId = chatRoom.groupId ? chatRoom.groupId : chatRoom.friends[0].name;
+    const chatRoomId = WhiteboardPanel.getWhiteBoardRoomId(chatRoom);
     if (WhiteboardPanel.currentPanels.has(chatRoomId)) {
       // If the webview panel already exists reveal it
       const panel = WhiteboardPanel.currentPanels.get(chatRoomId);
@@ -151,6 +169,9 @@ export class WhiteboardPanel {
         const command = message.command;
 
         switch (command) {
+          case "WhiteboardChange":
+            CodeSocket.socketEmit("send whiteboardchange", WhiteboardPanel.getWhiteBoardRoomId(message.chatRoom), message.change, message.data)
+            break;
         }
       },
       undefined,
