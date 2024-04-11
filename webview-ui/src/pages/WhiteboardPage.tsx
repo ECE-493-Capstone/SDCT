@@ -30,7 +30,7 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
             switch (message.command) {
               case 'get whiteboardchange':
                 if(message.change === "start"){
-                    startDrawing(message.data.brushType, message.data.offsetX, message.data.offsetY);
+                    startDrawing(message.data.brushType, message.data.offsetX, message.data.offsetY, message.data.text);
                 } else if(message.change === "draw") {
                     draw(message.data.offsetX, message.data.offsetY);
                 } else if(message.change === "finishdraw"){
@@ -63,12 +63,18 @@ function WhiteboardPage({chatRoom}: {chatRoom: IChatRoom}) {
         }
     };
 
-    const startDrawing = (_brushType: any, offsetX: any, offsetY: any) => {
+    const startDrawing = (_brushType: any, offsetX: any, offsetY: any, text: any) => {
         if (contextRef.current) {
+            if(_brushType === BrushType.Eraser){
+                getEraser();
+            } else if(_brushType === BrushType.Pen){
+                getBrush();
+            }
+
             if (_brushType === BrushType.Text) {
                 contextRef.current.font = "30px Arial";
                 contextRef.current.fillStyle = "white";
-                contextRef.current.fillText(textInput, offsetX, offsetY);
+                contextRef.current.fillText(text, offsetX, offsetY);
                 return;
             } else if (_brushType === BrushType.Square) {
                 contextRef.current.strokeStyle = "white";
