@@ -33,7 +33,7 @@ function App() {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [chatRoom]);
+  }, [page, chatRoom]);
 
   return (
     <main>

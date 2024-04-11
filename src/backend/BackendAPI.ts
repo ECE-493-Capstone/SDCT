@@ -220,7 +220,7 @@ export class BackendAPI {
     }
 
     async getGroupMessageHistory(chatRoom: IChatRoom): Promise<IMessage[]>{
-        const apiData = await this.getRequest(`/get_messages_group/${this.userID}/${chatRoom.groupId}`);
+        const apiData = await this.getRequest(`/get_messages_group/${chatRoom.groupId}`);
         
         const messageList: IMessage[] = [];
         if(apiData){
@@ -278,10 +278,9 @@ export class BackendAPI {
             const data_json = await apiData.json() as {data: IApiGroupNotification[]};
 
             for(let item of data_json.data){
-                newMap.set(item.GroupId, item);
+                newMap.set(item.GroupId.toString(), item);
             }
         }
-
         return newMap;
     }   
 
