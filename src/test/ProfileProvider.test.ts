@@ -1,9 +1,5 @@
-import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-import * as myExtension from '../extension';
+import { ProfileProvider } from '../providers/ProfileProvider';
 
 class MockExtensionContext implements vscode.ExtensionContext {
     workspaceState!: vscode.Memento;
@@ -26,17 +22,39 @@ class MockExtensionContext implements vscode.ExtensionContext {
     extensionPath: string = '/path/to/extension';
 }
 
-suite('Extension Test Suite', () => {
-	test('activate', () => {
-		const mockContext = new MockExtensionContext();
+suite('ProfileProvider test', () => {
+    const mockContext = new MockExtensionContext();
+    test('constructor()', () => {
         try {
-            myExtension.activate(mockContext);
-        } catch {}
-	});
-    test('deactivate', () => {
+            const provider = new ProfileProvider(mockContext)
+        }
+        catch {}
+    });
+    test('refresh()', () => {
         const mockContext = new MockExtensionContext();
+
         try {
-            myExtension.deactivate(mockContext);
+            const provider = new ProfileProvider(mockContext);
+            provider.refresh(mockContext);
+        } catch {}
+    });
+    test('getTreeItem()', () => {
+        const mockContext = new MockExtensionContext();
+
+        try {
+            const provider = new ProfileProvider(mockContext);
+            provider.getTreeItem({
+                name: 'name',
+                pictureUri: 'http://localhost:3000',
+            });
+        } catch {}
+    });
+    test('getChildren()', () => {
+        const mockContext = new MockExtensionContext();
+
+        try {
+            const provider = new ProfileProvider(mockContext);
+            provider.getChildren();
         } catch {}
     });
 });

@@ -1,9 +1,6 @@
-import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
+import { assert } from "console";
 import * as vscode from 'vscode';
-import * as myExtension from '../extension';
+import { Credentials } from "../services/Credentials";
 
 class MockExtensionContext implements vscode.ExtensionContext {
     workspaceState!: vscode.Memento;
@@ -26,17 +23,25 @@ class MockExtensionContext implements vscode.ExtensionContext {
     extensionPath: string = '/path/to/extension';
 }
 
-suite('Extension Test Suite', () => {
-	test('activate', () => {
-		const mockContext = new MockExtensionContext();
-        try {
-            myExtension.activate(mockContext);
-        } catch {}
-	});
-    test('deactivate', () => {
+suite('Credentials Test Suite', () => {
+	test('initialize', () => {
+        const credentials = new Credentials();
         const mockContext = new MockExtensionContext();
         try {
-            myExtension.deactivate(mockContext);
+            credentials.initialize(mockContext);
+        } catch {}
+	});
+    test('setOctokit', () => {
+        const credentials = new Credentials();
+        try {
+            credentials.setOctokit();
+        } catch {}
+    });
+    test('registerListeners', () => {
+        const credentials = new Credentials();
+        const mockContext = new MockExtensionContext();
+        try {
+            credentials.registerListeners(mockContext);
         } catch {}
     });
 });
