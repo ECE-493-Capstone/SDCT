@@ -46,6 +46,7 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
           const lastMessage = friendLastMsg.get(oldItem.name);
           if(lastMessage){
             this.data[i].lastMessage = lastMessage.MessageText;
+            this.data[i].lastMessageTime = new Date(lastMessage.MessageTime);
           }
         } else if(oldItem.groupId){
           const notif = groupNotif.get(oldItem.groupId);
@@ -58,9 +59,11 @@ export class ChatListProvider implements vscode.TreeDataProvider<IChat> {
           const lastMessage = groupLastMsg.get(oldItem.name);
           if(lastMessage){
             this.data[i].lastMessage = lastMessage.MessageText;
+            this.data[i].lastMessageTime = new Date(lastMessage.MessageTime);
           }
         }
       }
+      this.data.sort((a,b) => { return b.lastMessageTime.getTime()-a.lastMessageTime.getTime()})
       this._onDidChangeTreeData.fire();
     }
   }
