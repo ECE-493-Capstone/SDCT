@@ -1,5 +1,5 @@
 import { assert } from "console";
-import { chatMenu, sendMedia, sendFile, handleUserCodeMessage, joinVoiceChat, joinCodeSession, startCodeSession, showGroupMembers } from "../services/ChatMenu";
+import { chatMenu, sendMedia, sendFile, handleUserCodeMessage, joinVoiceChat, joinCodeSession, startCodeSession, leaveGroup } from "../services/ChatMenu";
 import { IChatRoom } from "../interfaces/IChatRoom";
 
 suite('ChatMenu Test Suite', () => {
@@ -161,6 +161,6 @@ suite('ChatMenu Test Suite', () => {
             joinedCodeSession: false,
             friendId: "123"
         };
-        showGroupMembers(chatRoom);
+        leaveGroup(chatRoom);
     });
 });

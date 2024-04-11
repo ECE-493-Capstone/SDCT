@@ -47,7 +47,7 @@ export async function chatMenu(chatRoom: IChatRoom) {
     }
 }
 
-const sendMedia = async (chatRoom: IChatRoom) => {
+export const sendMedia = async (chatRoom: IChatRoom) => {
     const media = await vscode.window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
@@ -70,7 +70,7 @@ const sendMedia = async (chatRoom: IChatRoom) => {
     }
 };
 
-const sendFile = async (chatRoom: IChatRoom) => {
+export const sendFile = async (chatRoom: IChatRoom) => {
     const file = await vscode.window.showOpenDialog({
         canSelectFiles: true,
         canSelectFolders: false,
@@ -92,17 +92,17 @@ const sendFile = async (chatRoom: IChatRoom) => {
     }
 };
 
-const handleUserCodeMessage = async (chatRoom: IChatRoom) => {
+export const handleUserCodeMessage = async (chatRoom: IChatRoom) => {
     const languages = ["javascript", "python", "java", "c", "c++", "c#", "typescript", "php", "ruby", "swift", "go", "rust", "kotlin", "scala", "r", "shell", "html", "css"];
     const language = await vscode.window.showQuickPick(languages);
     vscode.commands.executeCommand("sdct.handleUserCodeMessage", chatRoom, language);
 };
 
-const joinVoiceChat = (chatRoom: IChatRoom) => {
+export const joinVoiceChat = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.openVoiceChat", chatRoom);
 };
 
-const startCodeSession = (chatRoom: IChatRoom) => {
+export const startCodeSession = (chatRoom: IChatRoom) => {
     if(CodeSessionPanel.currentPanels.size >= 1){
         vscode.window.showErrorMessage("You may only be in 1 code session at a time")
         return;
@@ -111,7 +111,7 @@ const startCodeSession = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.startCodeSession", chatRoom);
 };
 
-const joinCodeSession = (chatRoom: IChatRoom) => {
+export const joinCodeSession = (chatRoom: IChatRoom) => {
     if(CodeSessionPanel.currentPanels.size >= 1){
         vscode.window.showErrorMessage("You may only be in 1 code session at a time")
         return;
@@ -120,6 +120,6 @@ const joinCodeSession = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.joinCodeSession", chatRoom);
 };
 
-const leaveGroup = (chatRoom: IChatRoom) => {
+export const leaveGroup = (chatRoom: IChatRoom) => {
     vscode.commands.executeCommand("sdct.leaveGroup", chatRoom.groupId);
 };

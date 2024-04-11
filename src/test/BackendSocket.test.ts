@@ -1,5 +1,6 @@
 import { assert } from "console";
 import { ChatSocket, VoiceSocket, CodeSocket } from '../backend/BackendSocket';
+import { IUser } from "../interfaces/IUser";
 
 suite('BackendSocket Test Suite', () => {
 	test('ChatSocket constructor', () => {
@@ -29,18 +30,30 @@ suite('BackendSocket Test Suite', () => {
     });
     test('VoiceScoket startVoiceChat()', () => {
         const voiceSocket = new VoiceSocket("mockURL", 123);
-        voiceSocket.startVoiceChat("mockRoomID");
+        const user: IUser = {
+            name: "test",
+            pictureUri: "http"
+        };
+        voiceSocket.startVoiceChat("mockRoomID", user);
         assert(voiceSocket instanceof VoiceSocket === true);
     });
     test('VoiceSocket muteVoiceChat()', () => {
         const voiceSocket = new VoiceSocket("mockURL", 123);
-        voiceSocket.startVoiceChat("mockRoomID");
+        const user: IUser = {
+            name: "test",
+            pictureUri: "http"
+        };
+        voiceSocket.startVoiceChat("mockRoomID", user);
         voiceSocket.muteVoiceChat();
         assert(voiceSocket instanceof VoiceSocket === true);
     });
     test("VoiceSocket endVoiceChat()", () => {
         const voiceSocket = new VoiceSocket("mockURL", 123);
-        voiceSocket.startVoiceChat("mockRoomID");
+        const user: IUser = {
+            name: "test",
+            pictureUri: "http"
+        };
+        voiceSocket.startVoiceChat("mockRoomID", user);
         voiceSocket.endVoiceChat();
         assert(voiceSocket instanceof VoiceSocket === true);
     });
