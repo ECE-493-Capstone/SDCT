@@ -190,7 +190,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		voiceSocket.startVoiceChat(chatRoomId, chatRoom.user);
 
-		voiceSession = spawn('python3',["src/python/audio_socketio.py", voiceSocket.getSocketInfo(), chatRoomId], {cwd: context.extensionPath});
+		voiceSession = spawn('python3',["out/python/audio_socketio.py", voiceSocket.getSocketInfo(), chatRoomId], {cwd: context.extensionPath});
 		voiceSession.stdout.on("data", (data) => {
 			console.log(`stdout: ${data}`);
 		  });

@@ -112,8 +112,8 @@
     }
   },
   "scripts": {
-    "install:all": "npm install && cd webview-ui && npm install",
-    "install:python": "cd src/python && python3 -m pip install -U -r requirements.txt",
+    "install:all": "npm install && npm run install:python && cd webview-ui && npm install && npm run build",
+    "install:python": "cd out/python && python3 -m pip install -U -r requirements.txt",
     "start:webview": "cd webview-ui && npm run start",
     "build:webview": "cd webview-ui && npm run build",
     "vscode:prepublish": "npm run compile",
@@ -127,7 +127,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.6",
     "@types/node": "18.x",
-    "@types/vscode": "^1.86.0",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
     "@vscode/test-cli": "^0.0.4",
